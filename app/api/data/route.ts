@@ -33,6 +33,7 @@ import {
   Asset,
   Meeting,
   Timesheet,
+  TimesheetEntry,
   HybridSchedule,
   UserRole
 } from '@/lib/types';
@@ -1333,27 +1334,173 @@ export async function POST(req: NextRequest) {
       // ========================================================================
       // 14. TIMESHEETS & PROJECT HOURS
       // ========================================================================
-      case 'SUBMIT_TIMESHEET': {
+      case 'SAVE_TIMESHEET': {
+        const empId = payload.employeeId || currentUserId;
         const total = (payload.entries || []).reduce((acc: number, curr: any) => acc + (Number(curr.totalHours) || 0), 0);
-        const newTs: Timesheet = {
-          ...payload,
-          id: `ts-${Date.now()}`,
-          totalHours: total,
-          status: 'SUBMITTED',
-          submittedAt: new Date().toISOString().split('T')[0]
-        };
-        db.timesheets.unshift(newTs);
+        
+        // Find existing timesheet by ID or by (employeeId + weekStartDate)
+        const existingIndex = db.timesheets.findIndex(
+          t => (payload.id && t.id === payload.id) || (t.employeeId === empId && t.weekStartDate === payload.weekStartDate)
+        );
+
+        let savedTs: Timesheet;
+        if (existingIndex >= 0) {
+          savedTs = {
+            ...db.timesheets[existingIndex],
+            weekStartDate: payload.weekStartDate,
+            weekEndDate: payload.weekEndDate || db.timesheets[existingIndex].weekEndDate,
+            entries: payload.entries || [],
+            totalHours: total,
+            status: payload.status || (db.timesheets[existingIndex].status === 'APPROVED' ? 'APPROVED' : 'DRAFT')
+          };
+          db.timesheets[existingIndex] = savedTs;
+        } else {
+          savedTs = {
+            id: payload.id || `ts-${Date.now()}`,
+            employeeId: empId,
+            weekStartDate: payload.weekStartDate,
+            weekEndDate: payload.weekEndDate || payload.weekStartDate,
+            status: payload.status || 'DRAFT',
+            entries: payload.entries || [],
+            totalHours: total
+          };
+          db.timesheets.unshift(savedTs);
+        }
+
+        recordAuditLog(
+          db,
+          'SAVE_TIMESHEET',
+          'Timesheets',
+          `Saved timesheet draft (${total} hours) for week of ${payload.weekStartDate}`,
+          empId,
+          currentUserName
+        );
+        writeDb(db);
+        return NextResponse.json({ success: true, data: savedTs });
+      }
+
+      case 'SUBMIT_TIMESHEET': {
+        const empId = payload.employeeId || currentUserId;
+        const total = (payload.entries || []).reduce((acc: number, curr: any) => acc + (Number(curr.totalHours) || 0), 0);
+        
+        const existingIndex = db.timesheets.findIndex(
+          t => (payload.id && t.id === payload.id) || (t.employeeId === empId && t.weekStartDate === payload.weekStartDate)
+        );
+
+        let submittedTs: Timesheet;
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        if (existingIndex >= 0) {
+          submittedTs = {
+            ...db.timesheets[existingIndex],
+            weekStartDate: payload.weekStartDate,
+            weekEndDate: payload.weekEndDate || db.timesheets[existingIndex].weekEndDate,
+            entries: payload.entries || [],
+            totalHours: total,
+            status: 'SUBMITTED',
+            submittedAt: todayStr
+          };
+          db.timesheets[existingIndex] = submittedTs;
+        } else {
+          submittedTs = {
+            id: payload.id || `ts-${Date.now()}`,
+            employeeId: empId,
+            weekStartDate: payload.weekStartDate,
+            weekEndDate: payload.weekEndDate || payload.weekStartDate,
+            status: 'SUBMITTED',
+            submittedAt: todayStr,
+            entries: payload.entries || [],
+            totalHours: total
+          };
+          db.timesheets.unshift(submittedTs);
+        }
 
         recordAuditLog(
           db,
           'SUBMIT_TIMESHEET',
           'Timesheets',
-          `Logged weekly timesheet (${total} billable project hours) for week ${payload.weekStartDate}`,
-          payload.employeeId,
+          `Submitted weekly timesheet (${total} billable project hours) for week of ${payload.weekStartDate} for approval`,
+          empId,
           currentUserName
         );
         writeDb(db);
-        return NextResponse.json({ success: true, data: newTs });
+        return NextResponse.json({ success: true, data: submittedTs });
+      }
+
+      case 'UNLOCK_TIMESHEET': {
+        const ts = db.timesheets.find(t => t.id === payload.id);
+        if (!ts) return NextResponse.json({ success: false, error: 'Timesheet not found' }, { status: 404 });
+
+        ts.status = 'DRAFT';
+        recordAuditLog(
+          db,
+          'UNLOCK_TIMESHEET',
+          'Timesheets',
+          `Re-opened timesheet (${ts.totalHours} hrs) for editing/revision`,
+          currentUserId,
+          currentUserName
+        );
+        writeDb(db);
+        return NextResponse.json({ success: true, data: ts });
+      }
+
+      case 'ASSIGN_TIMESHEET': {
+        requireRoles(['SUPER_ADMIN', 'HR_ADMIN', 'LINE_MANAGER'], 'Assigning project timesheets to staff');
+        const { targetEmployeeId, weekStartDate, weekEndDate, projectName, activity, mon, tue, wed, thu, fri } = payload;
+        
+        if (!targetEmployeeId || !projectName) {
+          return NextResponse.json({ success: false, error: 'Target employee and project name are required' }, { status: 400 });
+        }
+
+        const existingTs = db.timesheets.find(
+          t => t.employeeId === targetEmployeeId && t.weekStartDate === weekStartDate
+        );
+
+        const m = Number(mon) || 0;
+        const tu = Number(tue) || 0;
+        const w = Number(wed) || 0;
+        const th = Number(thu) || 0;
+        const f = Number(fri) || 0;
+        const rowTotal = m + tu + w + th + f;
+
+        const newEntry: TimesheetEntry = {
+          projectId: `prj-${Date.now()}`,
+          projectName,
+          activity: activity || 'Assigned project deliverable',
+          mon: m,
+          tue: tu,
+          wed: w,
+          thu: th,
+          fri: f,
+          totalHours: rowTotal
+        };
+
+        if (existingTs) {
+          existingTs.entries.push(newEntry);
+          existingTs.totalHours = existingTs.entries.reduce((acc, curr) => acc + (curr.totalHours || 0), 0);
+        } else {
+          db.timesheets.unshift({
+            id: `ts-${Date.now()}`,
+            employeeId: targetEmployeeId,
+            weekStartDate,
+            weekEndDate: weekEndDate || weekStartDate,
+            status: 'DRAFT',
+            entries: [newEntry],
+            totalHours: rowTotal
+          });
+        }
+
+        const targetEmp = db.employees.find(e => e.id === targetEmployeeId);
+        recordAuditLog(
+          db,
+          'ASSIGN_TIMESHEET',
+          'Timesheets',
+          `Assigned deliverable "${projectName}" to ${targetEmp ? `${targetEmp.firstName} ${targetEmp.lastName}` : targetEmployeeId} for week ${weekStartDate}`,
+          currentUserId,
+          currentUserName
+        );
+        writeDb(db);
+        return NextResponse.json({ success: true });
       }
 
       case 'REVIEW_TIMESHEET': {
