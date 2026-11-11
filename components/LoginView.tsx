@@ -71,43 +71,75 @@ export default function LoginView() {
   const preseedAccounts = [
     {
       id: 'emp-1',
-      name: 'Dr. Amina Bello',
-      role: 'Super Administrator',
-      designation: 'Executive Director & Chief Executive',
-      email: 'amina.bello@cisdialogue.org',
+      name: 'Folahan Johnson (FJ)',
+      role: 'Executive Director (L7)',
+      designation: 'Executive Director (All Three Arms)',
+      email: 'folahan.johnson@cisdialogue.org',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
+    },
+    {
+      id: 'emp-2',
+      name: 'Yaradua Phibi',
+      role: 'Lead HR Administrator',
+      designation: 'HR Administrator & Operations Lead',
+      email: 'yaradua.phibi@cisdialogue.org',
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80'
     },
     {
       id: 'emp-3',
-      name: 'Olumide Adeyemi',
-      role: 'HR Administrator',
-      designation: 'Director of HR & Administration',
-      email: 'olumide.adeyemi@cisdialogue.org',
+      name: 'Oluwatosin Onemola (Tosin)',
+      role: 'HR Admin Assistant',
+      designation: 'HR Admin Assistant',
+      email: 'tosin.onemola@cisdialogue.org',
+      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80'
+    },
+    {
+      id: 'emp-4',
+      name: 'Victory Kinosi',
+      role: 'Finance & Admin Officer',
+      designation: 'Finance & Admin Officer (All Three Arms)',
+      email: 'victory.kinosi@switchadvisory.com',
+      avatar: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=400&q=80'
+    },
+    {
+      id: 'emp-5',
+      name: 'George Kaduna',
+      role: 'Team Lead: GX Media',
+      designation: 'Communications Manager (GX Media Lead)',
+      email: 'george.kaduna@gxmedia.ng',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80'
     },
     {
-      id: 'emp-2',
-      name: 'Amb. Ibrahim Mukhtar',
-      role: 'Line Manager',
-      designation: 'Director of Research & Strategic Studies',
-      email: 'ibrahim.mukhtar@cisdialogue.org',
+      id: 'emp-6',
+      name: 'Chinonso Aluma',
+      role: 'Team Lead: Switch Advisory',
+      designation: 'Programs & Operations Manager (Switch Lead)',
+      email: 'chinonso.aluma@switchadvisory.com',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80'
     },
     {
       id: 'emp-7',
-      name: 'Dr. Chidi Okonkwo',
-      role: 'Staff Employee',
-      designation: 'Senior Fellow (Sahel & Gulf of Guinea)',
-      email: 'chidi.okonkwo@cisdialogue.org',
+      name: 'Marcus Ogunfolaju',
+      role: 'Team Lead: CISD',
+      designation: 'Senior Manager (CISD Lead)',
+      email: 'marcus.ogunfolaju@cisdialogue.org',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80'
+    },
+    {
+      id: 'emp-9',
+      name: 'Adebayo Toyosi',
+      role: 'Staff: GX Media House',
+      designation: 'Front End / Graphics Designer',
+      email: 'adebayo.toyosi@gxmedia.ng',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
     },
     {
-      id: 'emp-14',
-      name: 'Aisha Mohammed',
-      role: 'Staff Employee (Probation)',
-      designation: 'Research Analyst - Conflict Resolution',
-      email: 'aisha.mohammed@cisdialogue.org',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
+      id: 'emp-21',
+      name: 'Peace Okeke',
+      role: 'Staff: Switch Advisory',
+      designation: 'Programs Officer',
+      email: 'peace.okeke@switchadvisory.com',
+      avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=400&q=80'
     }
   ];
 

@@ -23,644 +23,1797 @@ import {
 
 export const initialDepartments: Department[] = [
   {
+    id: 'dept-exec',
+    name: 'Executive Directorate',
+    code: 'EXEC-HQ',
+    headId: 'emp-1',
+    description: 'Executive leadership, C-suite institutional governance, strategic foresight, and steering across Switch Advisory, CISD, and GX Media.',
+    location: 'Floor 5, Penthouse Executive Suite, Abuja HQ',
+    budget: '₦85,000,000',
+    organizationArm: 'CENTRAL_HOLDING'
+  },
+  {
+    id: 'dept-hr',
+    name: 'HR & People Operations',
+    code: 'CENTRAL-HR',
+    headId: 'emp-2',
+    description: 'Human talent management, institutional administration, employee welfare, performance appraisal, and central operations across all 3 arms.',
+    location: 'Floor 3, Central Administration Wing, Abuja HQ',
+    budget: '₦45,000,000',
+    organizationArm: 'CENTRAL_HOLDING'
+  },
+  {
+    id: 'dept-finance',
+    name: 'Finance & Accounts',
+    code: 'CENTRAL-FIN',
+    headId: 'emp-4',
+    description: 'Financial governance, payroll computation, donor grant accounting, budgetary control, statutory audits, and asset finance across all 3 arms.',
+    location: 'Floor 3, Financial Services Suite, Abuja HQ',
+    budget: '₦40,000,000',
+    organizationArm: 'CENTRAL_HOLDING'
+  },
+  {
+    id: 'dept-switch',
+    name: 'Switch Advisory',
+    code: 'SWITCH-ADV',
+    headId: 'emp-6',
+    description: 'Public sector advisory, policy implementation, consulting delivery, sovereign reform frameworks, and institutional capacity building.',
+    location: 'Floor 4, Strategic Advisory & Consulting Wing, Abuja HQ',
+    budget: '₦120,000,000',
+    organizationArm: 'SWITCH_ADVISORY'
+  },
+  {
+    id: 'dept-cisd',
+    name: 'Centre for Inclusive Social Development (CISD)',
+    code: 'CISD-NGO',
+    headId: 'emp-7',
+    description: 'Non-profit social dialogue, civil society partnerships, community inclusion research, donor-funded programmes, and multilateral advocacy.',
+    location: 'Floor 2, Development & Field Operations Suite, Abuja HQ',
+    budget: '₦95,000,000',
+    organizationArm: 'CISD'
+  },
+  {
+    id: 'dept-gx',
+    name: 'GX Media House',
+    code: 'GX-MEDIA',
+    headId: 'emp-5',
+    description: 'Creative branding, multimedia production, digital communications, video documentary editing, and social outreach for Switch and CISD.',
+    location: 'Floor 1, Creative Production & Media Studio, Abuja HQ',
+    budget: '₦60,000,000',
+    organizationArm: 'GX_MEDIA'
+  },
+  // Backward compatibility aliases
+  {
     id: 'dept-1',
-    name: 'HR & Administration',
+    name: 'HR & Administration (Central)',
     code: 'CISD-HRA',
-    headId: 'emp-3',
-    description: 'Human talent management, institutional operations, facilities, and staff welfare.',
+    headId: 'emp-2',
+    description: 'Human talent management and central operations.',
     location: 'Floor 3, Executive Wing, Abuja HQ',
-    budget: '$380,000'
+    budget: '₦45,000,000',
+    organizationArm: 'CENTRAL_HOLDING'
   },
   {
     id: 'dept-2',
-    name: 'Research & Policy Dialogue',
+    name: 'Switch Advisory (Consulting)',
     code: 'CISD-RPD',
-    headId: 'emp-2',
-    description: 'Strategic policy research, multilateral conflict analysis, and diplomatic dialogue facilitation.',
-    location: 'Floor 4, Strategic Foresight Center, Abuja HQ',
-    budget: '$1,250,000'
+    headId: 'emp-6',
+    description: 'Strategic advisory and consulting implementation.',
+    location: 'Floor 4, Foresight Center, Abuja HQ',
+    budget: '₦120,000,000',
+    organizationArm: 'SWITCH_ADVISORY'
   },
   {
     id: 'dept-3',
-    name: 'Finance & Accounts',
+    name: 'Finance & Accounts (Desk)',
     code: 'CISD-FIN',
     headId: 'emp-4',
-    description: 'Financial governance, donor grant accounting, budgetary control, and statutory audits.',
+    description: 'Financial governance and payroll management.',
     location: 'Floor 3, Finance Suite, Abuja HQ',
-    budget: '$420,000'
+    budget: '₦40,000,000',
+    organizationArm: 'CENTRAL_HOLDING'
   },
   {
     id: 'dept-4',
-    name: 'Communications & Strategic Media',
+    name: 'GX Media House (Creative)',
     code: 'CISD-CSM',
     headId: 'emp-5',
-    description: 'Public diplomacy, international press relations, policy publications, and digital outreach.',
-    location: 'Floor 2, Media Studio, Abuja HQ',
-    budget: '$340,000'
+    description: 'Media communications and creative production.',
+    location: 'Floor 1, Media Studio, Abuja HQ',
+    budget: '₦60,000,000',
+    organizationArm: 'GX_MEDIA'
   },
   {
     id: 'dept-5',
-    name: 'Strategy, Partnerships & Programmes',
+    name: 'Centre for Inclusive Social Development (Programmes)',
     code: 'CISD-SPP',
-    headId: 'emp-6',
-    description: 'Multilateral donor partnerships, programme delivery, diplomatic summits, and global missions.',
-    location: 'Floor 5, Global Partnerships Wing, Abuja HQ',
-    budget: '$980,000'
+    headId: 'emp-7',
+    description: 'Non-profit social dialogue and donor programmes.',
+    location: 'Floor 2, Development Wing, Abuja HQ',
+    budget: '₦95,000,000',
+    organizationArm: 'CISD'
   }
 ];
 
 export const initialEmployees: Employee[] = [
   {
-    id: 'emp-1',
-    employeeId: 'CISD-001',
-    firstName: 'Dr. Amina',
-    lastName: 'Bello',
-    email: 'amina.bello@cisdialogue.org',
-    phone: '+234 803 111 2233',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-5',
-    designation: 'Executive Director & Chief Executive',
-    role: 'SUPER_ADMIN',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2019-01-15',
-    workLocation: 'Abuja Head Office (Executive Suite)',
-    gradeLevel: 'Executive Level 1',
-    personalInfo: {
-      dob: '1976-04-12',
-      gender: 'Female',
-      maritalStatus: 'Married',
-      nationality: 'Nigerian',
-      address: 'Plot 422, Diplomatic Enclave, Maitama, Abuja',
-      bloodGroup: 'O+',
-      ninOrPassport: 'A08942155'
+    "id": "emp-1",
+    "employeeId": "CISD-001",
+    "firstName": "Folahan",
+    "lastName": "Johnson",
+    "email": "folahan.johnson@cisdialogue.org",
+    "phone": "+234 803 100 0001",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-exec",
+    "designation": "Executive Director (All Three Arms)",
+    "role": "EXECUTIVE",
+    "accessLevel": "L7",
+    "organizationArm": "CENTRAL_HOLDING",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2019-01-15",
+    "workLocation": "Abuja Head Office (Executive Suite)",
+    "gradeLevel": "L7 - C-Suite Executive",
+    "salaryGrade": "EXEC-L7",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Married",
+      "nationality": "Nigerian",
+      "address": "Plot 422, Diplomatic Enclave, Maitama, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN804888193"
     },
-    education: [
-      { degree: 'Ph.D. in International Relations & Geopolitics', institution: 'University of Oxford', year: '2006', field: 'Strategic Studies' },
-      { degree: 'M.Sc. in Conflict Resolution', institution: 'London School of Economics', year: '2001', field: 'International Affairs' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'United Nations Department of Political Affairs', role: 'Senior Strategic Advisor', fromYear: '2009', toYear: '2018', highlights: 'Led bilateral mediation efforts across West and Central Africa.' },
-      { company: 'Kofi Annan International Peacekeeping Centre', role: 'Research Fellow', fromYear: '2006', toYear: '2009', highlights: 'Authored 14 landmark policy briefs on regional security architectures.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Executive Director (All Three Arms)",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Dr. Farouk Bello', relationship: 'Spouse', phone: '+234 802 444 8899', email: 'farouk.bello@medcentre.org' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [
-      { name: 'Khadija Bello', relationship: 'Daughter', dob: '2011-08-20' },
-      { name: 'Zayn Bello', relationship: 'Son', dob: '2015-02-14' }
-    ],
-    salaryGrade: 'EXEC-A1'
+    "dependants": []
   },
   {
-    id: 'emp-2',
-    employeeId: 'CISD-002',
-    firstName: 'Amb. Ibrahim',
-    lastName: 'Mukhtar',
-    email: 'ibrahim.mukhtar@cisdialogue.org',
-    phone: '+234 809 333 4455',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-2',
-    designation: 'Director of Research & Policy Dialogue',
-    role: 'LINE_MANAGER',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2020-03-01',
-    reportingManagerId: 'emp-1',
-    workLocation: 'Abuja Head Office (Floor 4)',
-    gradeLevel: 'Director Level 2',
-    personalInfo: {
-      dob: '1968-09-24',
-      gender: 'Male',
-      maritalStatus: 'Married',
-      nationality: 'Nigerian',
-      address: 'No 18, Lake Chad Crescent, Maitama, Abuja',
-      bloodGroup: 'A+',
-      ninOrPassport: 'B11942001'
+    "id": "emp-2",
+    "employeeId": "CISD-002",
+    "firstName": "Yaradua",
+    "lastName": "Phibi",
+    "email": "yaradua.phibi@cisdialogue.org",
+    "phone": "+234 803 200 0002",
+    "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-hr",
+    "designation": "HR Administrator & Operations Lead",
+    "role": "SUPER_ADMIN",
+    "accessLevel": "L4",
+    "organizationArm": "CENTRAL_HOLDING",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2020-02-01",
+    "workLocation": "Abuja Head Office (HR Suite)",
+    "reportingManagerId": "emp-1",
+    "gradeLevel": "L4 - Senior Staff",
+    "salaryGrade": "SNR-L4",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Plot 104, Gana Street, Maitama, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN845354082"
     },
-    education: [
-      { degree: 'M.A. in Diplomatic Studies', institution: 'Georgetown University', year: '1995', field: 'Foreign Policy' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'Ministry of Foreign Affairs', role: 'Ambassador Plenipotentiary', fromYear: '2004', toYear: '2019', highlights: 'Served as Special Envoy to the African Union and Geneva.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "HR Administrator & Operations Lead",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Hajiya Maryam Mukhtar', relationship: 'Spouse', phone: '+234 803 777 9900', email: 'maryam.mukhtar@yahoo.com' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [
-      { name: 'Umar Mukhtar', relationship: 'Son', dob: '2004-11-05' }
-    ],
-    salaryGrade: 'DIR-D2'
+    "dependants": []
   },
   {
-    id: 'emp-3',
-    employeeId: 'CISD-003',
-    firstName: 'Olumide',
-    lastName: 'Adeyemi',
-    email: 'olumide.adeyemi@cisdialogue.org',
-    phone: '+234 802 555 6677',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-1',
-    designation: 'Director of HR & Administration',
-    role: 'HR_ADMIN',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2020-07-15',
-    reportingManagerId: 'emp-1',
-    workLocation: 'Abuja Head Office (Floor 3)',
-    gradeLevel: 'Director Level 2',
-    personalInfo: {
-      dob: '1979-11-18',
-      gender: 'Male',
-      maritalStatus: 'Married',
-      nationality: 'Nigerian',
-      address: '24 Nile Street, Sun City, Abuja',
-      bloodGroup: 'O+',
-      ninOrPassport: 'NIN-99482104'
+    "id": "emp-3",
+    "employeeId": "CISD-003",
+    "firstName": "Oluwatosin",
+    "lastName": "Onemola",
+    "email": "tosin.onemola@cisdialogue.org",
+    "phone": "+234 803 300 0003",
+    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-hr",
+    "designation": "HR Admin Assistant",
+    "role": "HR_ADMIN",
+    "accessLevel": "L2",
+    "organizationArm": "CENTRAL_HOLDING",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2022-06-15",
+    "workLocation": "Abuja Head Office (HR Suite)",
+    "reportingManagerId": "emp-2",
+    "gradeLevel": "L2 - Junior Staff",
+    "salaryGrade": "JUN-L2",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Aso Drive, Asokoro, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN323826172"
     },
-    education: [
-      { degree: 'M.Sc. Human Resource Management', institution: 'University of Manchester', year: '2007', field: 'Human Resources' },
-      { degree: 'B.Sc. Public Administration', institution: 'University of Ibadan', year: '2002', field: 'Social Sciences' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'ECOWAS Commission', role: 'Principal HR Specialist', fromYear: '2012', toYear: '2020', highlights: 'Directed multinational recruitment and staff performance management.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "HR Admin Assistant",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Tolulope Adeyemi', relationship: 'Spouse', phone: '+234 803 123 7890', email: 'tolu.adeyemi@gmail.com' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [
-      { name: 'Tiwa Adeyemi', relationship: 'Daughter', dob: '2014-06-11' },
-      { name: 'Femi Adeyemi', relationship: 'Son', dob: '2018-09-02' }
-    ],
-    salaryGrade: 'DIR-D2'
+    "dependants": []
   },
   {
-    id: 'emp-4',
-    employeeId: 'CISD-004',
-    firstName: 'Ngozi',
-    lastName: 'Eze',
-    email: 'ngozi.eze@cisdialogue.org',
-    phone: '+234 803 666 7788',
-    avatar: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-3',
-    designation: 'Director of Finance & Accounts',
-    role: 'LINE_MANAGER',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2021-02-01',
-    reportingManagerId: 'emp-1',
-    workLocation: 'Abuja Head Office (Floor 3)',
-    gradeLevel: 'Director Level 2',
-    personalInfo: {
-      dob: '1982-03-30',
-      gender: 'Female',
-      maritalStatus: 'Married',
-      nationality: 'Nigerian',
-      address: '15 Rhine Street, Maitama, Abuja',
-      bloodGroup: 'B+',
-      ninOrPassport: 'A77219044'
+    "id": "emp-4",
+    "employeeId": "CISD-004",
+    "firstName": "Victory",
+    "lastName": "Kinosi",
+    "email": "victory.kinosi@switchadvisory.com",
+    "phone": "+234 803 400 0004",
+    "avatar": "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-finance",
+    "designation": "Finance & Admin Officer (All Three Arms)",
+    "role": "FINANCE",
+    "accessLevel": "L2",
+    "organizationArm": "CENTRAL_HOLDING",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2021-08-01",
+    "workLocation": "Abuja Head Office (Finance Suite)",
+    "reportingManagerId": "emp-1",
+    "gradeLevel": "L2 - Junior Staff",
+    "salaryGrade": "FIN-L2",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Wuse II, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN750684629"
     },
-    education: [
-      { degree: 'FCA, Fellow of the Institute of Chartered Accountants of Nigeria (ICAN)', institution: 'ICAN', year: '2010', field: 'Chartered Accountancy' },
-      { degree: 'B.Sc. Accounting', institution: 'University of Nigeria, Nsukka', year: '2004', field: 'Accounting' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'PwC West Africa', role: 'Senior Audit Manager', fromYear: '2014', toYear: '2021', highlights: 'Led NGO and public sector governance assurance audits.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Finance & Admin Officer (All Three Arms)",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Emeka Eze', relationship: 'Spouse', phone: '+234 802 888 1122', email: 'emeka.eze@techgroup.ng' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [
-      { name: 'Chisom Eze', relationship: 'Daughter', dob: '2016-12-04' }
-    ],
-    salaryGrade: 'DIR-D2'
+    "dependants": []
   },
   {
-    id: 'emp-5',
-    employeeId: 'CISD-005',
-    firstName: 'Fatima',
-    lastName: 'Al-Hassan',
-    email: 'fatima.alhassan@cisdialogue.org',
-    phone: '+234 805 777 8899',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-4',
-    designation: 'Head of Communications & Strategic Media',
-    role: 'LINE_MANAGER',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2021-09-15',
-    reportingManagerId: 'emp-1',
-    workLocation: 'Abuja Head Office (Floor 2)',
-    gradeLevel: 'Head Level 3',
-    personalInfo: {
-      dob: '1985-07-19',
-      gender: 'Female',
-      maritalStatus: 'Single',
-      nationality: 'Nigerian',
-      address: '8 Euphrates Street, Wuse 2, Abuja',
-      bloodGroup: 'O+',
-      ninOrPassport: 'NIN-18490219'
+    "id": "emp-5",
+    "employeeId": "GX-001",
+    "firstName": "George",
+    "lastName": "Kaduna",
+    "email": "george.kaduna@gxmedia.ng",
+    "phone": "+234 803 500 0005",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-gx",
+    "designation": "Communications Manager (GX Media Lead)",
+    "role": "LINE_MANAGER",
+    "accessLevel": "L5",
+    "organizationArm": "GX_MEDIA",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2020-04-10",
+    "workLocation": "Abuja Head Office (Media Studio)",
+    "reportingManagerId": "emp-1",
+    "gradeLevel": "L5 - Manager",
+    "salaryGrade": "MGR-L5",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Married",
+      "nationality": "Nigerian",
+      "address": "Plot 55, Crescent Road, Garki, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN324180501"
     },
-    education: [
-      { degree: 'M.A. Strategic Communications', institution: 'Columbia University', year: '2012', field: 'Journalism & Media' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'Al Jazeera Media Network', role: 'Diplomatic Producer', fromYear: '2015', toYear: '2021', highlights: 'Covered AU summits and global strategic dialogues.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Communications Manager (GX Media Lead)",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Bashir Al-Hassan', relationship: 'Brother', phone: '+234 803 999 0011', email: 'bashir.al@capital.ng' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [],
-    salaryGrade: 'MGR-M1'
+    "dependants": []
   },
   {
-    id: 'emp-6',
-    employeeId: 'CISD-006',
-    firstName: 'Tariq',
-    lastName: 'Mansoor',
-    email: 'tariq.mansoor@cisdialogue.org',
-    phone: '+234 806 888 9900',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-5',
-    designation: 'Head of Strategy, Partnerships & Programmes',
-    role: 'LINE_MANAGER',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2022-01-10',
-    reportingManagerId: 'emp-1',
-    workLocation: 'Abuja Head Office (Floor 5)',
-    gradeLevel: 'Head Level 3',
-    personalInfo: {
-      dob: '1981-12-03',
-      gender: 'Male',
-      maritalStatus: 'Married',
-      nationality: 'Nigerian',
-      address: '21 Amazon Street, Maitama, Abuja',
-      bloodGroup: 'A-',
-      ninOrPassport: 'A99201443'
+    "id": "emp-6",
+    "employeeId": "SW-001",
+    "firstName": "Chinonso",
+    "lastName": "Aluma",
+    "email": "chinonso.aluma@switchadvisory.com",
+    "phone": "+234 803 600 0006",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-switch",
+    "designation": "Programs & Operations Manager (Switch Advisory Lead)",
+    "role": "LINE_MANAGER",
+    "accessLevel": "L5",
+    "organizationArm": "SWITCH_ADVISORY",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2020-01-20",
+    "workLocation": "Abuja Head Office (Switch Advisory Wing)",
+    "reportingManagerId": "emp-1",
+    "gradeLevel": "L5 - Manager",
+    "salaryGrade": "MGR-L5",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Married",
+      "nationality": "Nigerian",
+      "address": "Diplomatic Zone, Central Business District, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN601106814"
     },
-    education: [
-      { degree: 'M.Sc. Global Development Policy', institution: 'Harvard Kennedy School', year: '2010', field: 'Public Policy' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'African Development Bank (AfDB)', role: 'Senior Programme Officer', fromYear: '2013', toYear: '2021', highlights: 'Managed $45M international multilateral cooperation portfolio.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Programs & Operations Manager (Switch Advisory Lead)",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Zuhra Mansoor', relationship: 'Spouse', phone: '+234 809 111 5566', email: 'zuhra.m@outlook.com' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [
-      { name: 'Adam Mansoor', relationship: 'Son', dob: '2017-05-18' }
-    ],
-    salaryGrade: 'MGR-M1'
+    "dependants": []
   },
   {
-    id: 'emp-7',
-    employeeId: 'CISD-007',
-    firstName: 'Dr. Chidi',
-    lastName: 'Okonkwo',
-    email: 'chidi.okonkwo@cisdialogue.org',
-    phone: '+234 803 999 1122',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-2',
-    designation: 'Senior Strategic Policy Fellow',
-    role: 'EMPLOYEE',
-    status: 'ACTIVE',
-    employmentType: 'FELLOW',
-    joinDate: '2022-06-01',
-    reportingManagerId: 'emp-2',
-    workLocation: 'Hybrid (Abuja / Geneva)',
-    gradeLevel: 'Senior Fellow Level 4',
-    personalInfo: {
-      dob: '1984-05-15',
-      gender: 'Male',
-      maritalStatus: 'Married',
-      nationality: 'Nigerian',
-      address: '14 Zambezi Crescent, Maitama, Abuja',
-      bloodGroup: 'O+',
-      ninOrPassport: 'NIN-44589201'
+    "id": "emp-7",
+    "employeeId": "CISD-005",
+    "firstName": "Marcus",
+    "lastName": "Ogunfolaju",
+    "email": "marcus.ogunfolaju@cisdialogue.org",
+    "phone": "+234 803 700 0007",
+    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-cisd",
+    "designation": "Senior Manager (CISD Lead)",
+    "role": "LINE_MANAGER",
+    "accessLevel": "L6",
+    "organizationArm": "CISD",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2019-09-01",
+    "workLocation": "Abuja Head Office (CISD Programme Suite)",
+    "reportingManagerId": "emp-1",
+    "gradeLevel": "L6 - Senior Manager",
+    "salaryGrade": "SNR-MGR-L6",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Married",
+      "nationality": "Nigerian",
+      "address": "Plot 72, Nile Street, Maitama, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN353960773"
     },
-    education: [
-      { degree: 'Ph.D. Political Science', institution: 'University of Cambridge', year: '2015', field: 'Geopolitical Economies' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'Chatham House', role: 'Consulting Research Associate', fromYear: '2017', toYear: '2022', highlights: 'Authored trade and regional integration studies.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Senior Manager (CISD Lead)",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Adaora Okonkwo', relationship: 'Spouse', phone: '+234 802 333 9911', email: 'adaora.o@yahoo.com' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [
-      { name: 'Ifeanyi Okonkwo', relationship: 'Son', dob: '2019-01-22' }
-    ],
-    salaryGrade: 'FEL-F1'
+    "dependants": []
   },
   {
-    id: 'emp-8',
-    employeeId: 'CISD-008',
-    firstName: 'Zainab',
-    lastName: 'Abubakar',
-    email: 'zainab.abubakar@cisdialogue.org',
-    phone: '+234 807 111 4433',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-1',
-    designation: 'Senior HR & Talent Officer',
-    role: 'HR_ADMIN',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2022-10-15',
-    reportingManagerId: 'emp-3',
-    workLocation: 'Abuja Head Office (Floor 3)',
-    gradeLevel: 'Senior Officer Level 4',
-    personalInfo: {
-      dob: '1989-08-11',
-      gender: 'Female',
-      maritalStatus: 'Single',
-      nationality: 'Nigerian',
-      address: '12 Gana Street, Maitama, Abuja',
-      bloodGroup: 'B+',
-      ninOrPassport: 'NIN-89302114'
+    "id": "emp-8",
+    "employeeId": "GX-002",
+    "firstName": "Amedari",
+    "lastName": "Godsfavour",
+    "email": "amedari.godsfavour@gxmedia.ng",
+    "phone": "+234 803 800 0008",
+    "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-gx",
+    "designation": "Senior Multi-Media Editor",
+    "role": "EMPLOYEE",
+    "accessLevel": "L4",
+    "organizationArm": "GX_MEDIA",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2021-02-15",
+    "workLocation": "Abuja Head Office (Media Studio)",
+    "reportingManagerId": "emp-5",
+    "gradeLevel": "L4 - Senior Staff",
+    "salaryGrade": "SNR-L4",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Jabi District, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN219172360"
     },
-    education: [
-      { degree: 'B.Sc. Industrial Relations & Personnel Management', institution: 'University of Lagos', year: '2011', field: 'Human Resources' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'Heirs Holdings', role: 'HR Specialist', fromYear: '2016', toYear: '2022', highlights: 'Employee engagement, compensation, and onboarding.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Senior Multi-Media Editor",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Aliyu Abubakar', relationship: 'Father', phone: '+234 803 222 6677', email: 'aliyu.ab@kano.gov.ng' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [],
-    salaryGrade: 'OFF-O2'
+    "dependants": []
   },
   {
-    id: 'emp-9',
-    employeeId: 'CISD-009',
-    firstName: 'Babatunde',
-    lastName: 'Fashina',
-    email: 'babatunde.fashina@cisdialogue.org',
-    phone: '+234 802 222 8833',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-3',
-    designation: 'Senior Financial Analyst & Grant Controller',
-    role: 'EMPLOYEE',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2023-01-20',
-    reportingManagerId: 'emp-4',
-    workLocation: 'Abuja Head Office (Floor 3)',
-    gradeLevel: 'Senior Officer Level 4',
-    personalInfo: {
-      dob: '1988-02-17',
-      gender: 'Male',
-      maritalStatus: 'Married',
-      nationality: 'Nigerian',
-      address: '6 Victoria Falls Street, Maitama, Abuja',
-      bloodGroup: 'O+',
-      ninOrPassport: 'A90214881'
+    "id": "emp-9",
+    "employeeId": "GX-003",
+    "firstName": "Adebayo",
+    "lastName": "Toyosi",
+    "email": "adebayo.toyosi@gxmedia.ng",
+    "phone": "+234 803 900 0009",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-gx",
+    "designation": "Front End / Graphics Designer",
+    "role": "EMPLOYEE",
+    "accessLevel": "L4",
+    "organizationArm": "GX_MEDIA",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2021-05-10",
+    "workLocation": "Abuja Head Office (Media Studio)",
+    "reportingManagerId": "emp-5",
+    "gradeLevel": "L4 - Senior Staff",
+    "salaryGrade": "SNR-L4",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Guzape, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN514363646"
     },
-    education: [
-      { degree: 'B.Sc. Finance & Banking', institution: 'Obafemi Awolowo University', year: '2010', field: 'Finance' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'KPMG Nigeria', role: 'Grant Advisory Associate', fromYear: '2015', toYear: '2022', highlights: 'Donor grant financial accountability and forecasting.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Front End / Graphics Designer",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Funmilayo Fashina', relationship: 'Spouse', phone: '+234 809 444 1188', email: 'funmi.fash@gmail.com' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [
-      { name: 'Kayode Fashina', relationship: 'Son', dob: '2021-04-10' }
-    ],
-    salaryGrade: 'OFF-O2'
+    "dependants": []
   },
   {
-    id: 'emp-10',
-    employeeId: 'CISD-010',
-    firstName: 'Elena',
-    lastName: 'Rostova',
-    email: 'elena.rostova@cisdialogue.org',
-    phone: '+234 806 777 0044',
-    avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-2',
-    designation: 'International Dialogue & Multilateral Specialist',
-    role: 'EMPLOYEE',
-    status: 'ACTIVE',
-    employmentType: 'CONTRACT',
-    joinDate: '2023-05-01',
-    reportingManagerId: 'emp-2',
-    workLocation: 'Hybrid (Abuja / Vienna)',
-    gradeLevel: 'Senior Specialist Level 4',
-    personalInfo: {
-      dob: '1987-10-09',
-      gender: 'Female',
-      maritalStatus: 'Single',
-      nationality: 'Austrian / International Staff',
-      address: 'Apartment 4B, Southern Sun Residences, Abuja',
-      bloodGroup: 'A+',
-      ninOrPassport: 'P-AT884920'
+    "id": "emp-10",
+    "employeeId": "GX-004",
+    "firstName": "Michael",
+    "lastName": "Pabiekun",
+    "email": "michael.pabiekun@gxmedia.ng",
+    "phone": "+234 803 101 0010",
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-gx",
+    "designation": "Media & Branding Consultant",
+    "role": "EMPLOYEE",
+    "accessLevel": "L4",
+    "organizationArm": "GX_MEDIA",
+    "status": "ACTIVE",
+    "employmentType": "CONTRACT",
+    "joinDate": "2022-01-10",
+    "workLocation": "Abuja Head Office (Media Studio)",
+    "reportingManagerId": "emp-5",
+    "gradeLevel": "L4 - Senior Staff",
+    "salaryGrade": "SNR-L4",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Mabushi, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN304088257"
     },
-    education: [
-      { degree: 'Master of Advanced International Studies', institution: 'Diplomatic Academy of Vienna', year: '2013', field: 'European Affairs' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'OSCE Secretariat', role: 'Policy Officer', fromYear: '2016', toYear: '2023', highlights: 'Track II diplomacy and multilateral confidence building.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Media & Branding Consultant",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Dr. Klaus Rostova', relationship: 'Father', phone: '+43 676 123 4567', email: 'klaus.rostova@univie.ac.at' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [],
-    salaryGrade: 'SPEC-S1'
+    "dependants": []
   },
   {
-    id: 'emp-11',
-    employeeId: 'CISD-011',
-    firstName: 'David',
-    lastName: 'Kalu',
-    email: 'david.kalu@cisdialogue.org',
-    phone: '+234 803 555 9900',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-1',
-    designation: 'IT Infrastructure & Digital Security Lead',
-    role: 'EMPLOYEE',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2023-08-15',
-    reportingManagerId: 'emp-3',
-    workLocation: 'Abuja Head Office (Floor 3)',
-    gradeLevel: 'Lead Officer Level 4',
-    personalInfo: {
-      dob: '1991-01-28',
-      gender: 'Male',
-      maritalStatus: 'Single',
-      nationality: 'Nigerian',
-      address: 'Plot 10, Jabi Lake Vista, Abuja',
-      bloodGroup: 'O-',
-      ninOrPassport: 'NIN-55092144'
+    "id": "emp-11",
+    "employeeId": "GX-005",
+    "firstName": "Jonathan",
+    "lastName": "Oladayo",
+    "email": "jonathan.oladayo@gxmedia.ng",
+    "phone": "+234 803 102 0011",
+    "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-gx",
+    "designation": "Senior Social Media Manager",
+    "role": "EMPLOYEE",
+    "accessLevel": "L3",
+    "organizationArm": "GX_MEDIA",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2022-03-01",
+    "workLocation": "Abuja Head Office (Media Studio)",
+    "reportingManagerId": "emp-5",
+    "gradeLevel": "L3 - Mid-Level",
+    "salaryGrade": "MID-L3",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Katampe Extension, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN536239645"
     },
-    education: [
-      { degree: 'B.Eng. Computer Engineering', institution: 'Covenant University', year: '2013', field: 'Cybersecurity' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'MainOne Cables', role: 'Network & Cloud Engineer', fromYear: '2017', toYear: '2023', highlights: 'Zero-trust infrastructure and enterprise identity management.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Senior Social Media Manager",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Grace Kalu', relationship: 'Mother', phone: '+234 803 777 4411', email: 'grace.kalu@gmail.com' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [],
-    salaryGrade: 'OFF-O2'
+    "dependants": []
   },
   {
-    id: 'emp-12',
-    employeeId: 'CISD-012',
-    firstName: 'Maryam',
-    lastName: 'Danjuma',
-    email: 'maryam.danjuma@cisdialogue.org',
-    phone: '+234 805 111 6622',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-4',
-    designation: 'Digital Communications & Publications Officer',
-    role: 'EMPLOYEE',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2024-02-01',
-    reportingManagerId: 'emp-5',
-    workLocation: 'Abuja Head Office (Floor 2)',
-    gradeLevel: 'Officer Level 5',
-    personalInfo: {
-      dob: '1994-06-25',
-      gender: 'Female',
-      maritalStatus: 'Single',
-      nationality: 'Nigerian',
-      address: '18 Aguiyi Ironsi Way, Maitama, Abuja',
-      bloodGroup: 'A+',
-      ninOrPassport: 'NIN-77382910'
+    "id": "emp-12",
+    "employeeId": "GX-006",
+    "firstName": "Benjamin",
+    "lastName": "Olayiwola",
+    "email": "benjamin.olayiwola@gxmedia.ng",
+    "phone": "+234 803 103 0012",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-gx",
+    "designation": "Graphics Designer",
+    "role": "EMPLOYEE",
+    "accessLevel": "L3",
+    "organizationArm": "GX_MEDIA",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2022-07-15",
+    "workLocation": "Abuja Head Office (Media Studio)",
+    "reportingManagerId": "emp-5",
+    "gradeLevel": "L3 - Mid-Level",
+    "salaryGrade": "MID-L3",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Life Camp, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN641359566"
     },
-    education: [
-      { degree: 'B.A. Mass Communication', institution: 'Ahmadu Bello University', year: '2016', field: 'Journalism' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'Channels Television', role: 'Digital News Editor', fromYear: '2018', toYear: '2024', highlights: 'Content strategy, social broadcasting, and diplomatic coverage.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Graphics Designer",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Suleiman Danjuma', relationship: 'Brother', phone: '+234 802 999 4455', email: 'sule.d@telecom.ng' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [],
-    salaryGrade: 'OFF-O1'
+    "dependants": []
   },
   {
-    id: 'emp-13',
-    employeeId: 'CISD-013',
-    firstName: 'Emmanuel',
-    lastName: 'Kwesi',
-    email: 'emmanuel.kwesi@cisdialogue.org',
-    phone: '+234 807 444 3322',
-    avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-5',
-    designation: 'Programme Coordinator - West Africa & Sahel',
-    role: 'EMPLOYEE',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2024-04-15',
-    reportingManagerId: 'emp-6',
-    workLocation: 'Abuja Head Office (Floor 5)',
-    gradeLevel: 'Officer Level 5',
-    personalInfo: {
-      dob: '1990-09-14',
-      gender: 'Male',
-      maritalStatus: 'Married',
-      nationality: 'Ghanaian / ECOWAS Resident',
-      address: 'Block C4, Diplomatic Quarters, Garki, Abuja',
-      bloodGroup: 'O+',
-      ninOrPassport: 'GHA-8849201'
+    "id": "emp-13",
+    "employeeId": "GX-007",
+    "firstName": "Adeeko",
+    "lastName": "Adedoyin",
+    "email": "adeeko.adedoyin@gxmedia.ng",
+    "phone": "+234 803 104 0013",
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-gx",
+    "designation": "Graphic Designer",
+    "role": "EMPLOYEE",
+    "accessLevel": "L2",
+    "organizationArm": "GX_MEDIA",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2023-01-10",
+    "workLocation": "Abuja Head Office (Media Studio)",
+    "reportingManagerId": "emp-5",
+    "gradeLevel": "L2 - Junior Staff",
+    "salaryGrade": "JUN-L2",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Lugbe Federal Housing, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN252496114"
     },
-    education: [
-      { degree: 'M.A. Peace & Development Studies', institution: 'University of Cape Coast', year: '2015', field: 'Peace Studies' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'West Africa Network for Peacebuilding (WANEP)', role: 'Programme Officer', fromYear: '2017', toYear: '2024', highlights: 'Managed civil society dialogues in Mali and Niger.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Graphic Designer",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Abena Kwesi', relationship: 'Spouse', phone: '+233 24 123 4567', email: 'abena.kwesi@ghana.com' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [
-      { name: 'Kofi Kwesi', relationship: 'Son', dob: '2022-03-12' }
-    ],
-    salaryGrade: 'OFF-O1'
+    "dependants": []
   },
   {
-    id: 'emp-14',
-    employeeId: 'CISD-014',
-    firstName: 'Aisha',
-    lastName: 'Mohammed',
-    email: 'aisha.mohammed@cisdialogue.org',
-    phone: '+234 809 666 5511',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-2',
-    designation: 'Research Analyst - Energy & Climate Transition',
-    role: 'EMPLOYEE',
-    status: 'ON_PROBATION',
-    employmentType: 'FULL_TIME',
-    joinDate: '2026-08-01',
-    probationEndDate: '2026-11-01',
-    reportingManagerId: 'emp-2',
-    workLocation: 'Abuja Head Office (Floor 4)',
-    gradeLevel: 'Associate Level 6',
-    personalInfo: {
-      dob: '1996-03-18',
-      gender: 'Female',
-      maritalStatus: 'Single',
-      nationality: 'Nigerian',
-      address: '27 Adetokunbo Ademola Crescent, Wuse 2, Abuja',
-      bloodGroup: 'B-',
-      ninOrPassport: 'NIN-99104829'
+    "id": "emp-14",
+    "employeeId": "GX-008",
+    "firstName": "Adeboye",
+    "lastName": "Tolulope",
+    "email": "adeboye.tolulope@gxmedia.ng",
+    "phone": "+234 803 105 0014",
+    "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-gx",
+    "designation": "Junior Multi-Media Editor",
+    "role": "EMPLOYEE",
+    "accessLevel": "L1",
+    "organizationArm": "GX_MEDIA",
+    "status": "ON_PROBATION",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2024-02-01",
+    "workLocation": "Abuja Head Office (Media Studio)",
+    "reportingManagerId": "emp-5",
+    "gradeLevel": "L1 - Entry Level",
+    "salaryGrade": "ENT-L1",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Kubwa, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN390224765"
     },
-    education: [
-      { degree: 'M.Sc. Energy Politics & Geopolitics', institution: 'Imperial College London', year: '2023', field: 'Energy Transition' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'African Energy Chamber', role: 'Junior Research Analyst', fromYear: '2023', toYear: '2026', highlights: 'Synthesized critical mineral supply chain data for African policymakers.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Junior Multi-Media Editor",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Dr. Haliru Mohammed', relationship: 'Father', phone: '+234 803 888 7722', email: 'h.mohammed@consult.ng' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [],
-    salaryGrade: 'ASC-A1'
+    "dependants": []
   },
   {
-    id: 'emp-15',
-    employeeId: 'CISD-015',
-    firstName: 'Samuel',
-    lastName: 'Adeleke',
-    email: 'samuel.adeleke@cisdialogue.org',
-    phone: '+234 802 777 3344',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
-    departmentId: 'dept-1',
-    designation: 'Procurement & Administrative Officer',
-    role: 'EMPLOYEE',
-    status: 'ACTIVE',
-    employmentType: 'FULL_TIME',
-    joinDate: '2024-06-01',
-    reportingManagerId: 'emp-3',
-    workLocation: 'Abuja Head Office (Floor 3)',
-    gradeLevel: 'Officer Level 5',
-    personalInfo: {
-      dob: '1992-11-02',
-      gender: 'Male',
-      maritalStatus: 'Single',
-      nationality: 'Nigerian',
-      address: '14 Bissau Street, Wuse Zone 6, Abuja',
-      bloodGroup: 'O+',
-      ninOrPassport: 'NIN-66291044'
+    "id": "emp-15",
+    "employeeId": "GX-009",
+    "firstName": "Sadiya",
+    "lastName": "Mukhtar",
+    "email": "sadiya.mukhtar@gxmedia.ng",
+    "phone": "+234 803 106 0015",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-gx",
+    "designation": "Comms Associate & Content Assistant",
+    "role": "EMPLOYEE",
+    "accessLevel": "L1",
+    "organizationArm": "GX_MEDIA",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2023-09-01",
+    "workLocation": "Abuja Head Office (Media Studio)",
+    "reportingManagerId": "emp-5",
+    "gradeLevel": "L1 - Entry Level",
+    "salaryGrade": "ENT-L1",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Gwarinpa Estate, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN597596866"
     },
-    education: [
-      { degree: 'B.Sc. Supply Chain Management', institution: 'Federal University of Technology, Akure', year: '2014', field: 'Logistics' }
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
     ],
-    workExperience: [
-      { company: 'DHL Global Forwarding', role: 'Operations Officer', fromYear: '2018', toYear: '2024', highlights: 'Procurement, vendor compliance, and asset tracking.' }
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Comms Associate & Content Assistant",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
     ],
-    emergencyContacts: [
-      { name: 'Kemi Adeleke', relationship: 'Sister', phone: '+234 803 444 8811', email: 'kemi.adeleke@gmail.com' }
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
     ],
-    dependants: [],
-    salaryGrade: 'OFF-O1'
+    "dependants": []
+  },
+  {
+    "id": "emp-16",
+    "employeeId": "GX-010",
+    "firstName": "Covenant",
+    "lastName": "Adoguw",
+    "email": "covenant.adoguw@gxmedia.ng",
+    "phone": "+234 803 107 0016",
+    "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-gx",
+    "designation": "Social Media Intern",
+    "role": "EMPLOYEE",
+    "accessLevel": "L1",
+    "organizationArm": "GX_MEDIA",
+    "status": "ON_PROBATION",
+    "employmentType": "INTERN",
+    "joinDate": "2024-04-15",
+    "workLocation": "Abuja Head Office (Media Studio)",
+    "reportingManagerId": "emp-5",
+    "gradeLevel": "L1 - Entry Level",
+    "salaryGrade": "ENT-L1",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Dawaki, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN593485724"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Social Media Intern",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-17",
+    "employeeId": "SW-002",
+    "firstName": "Shamsu",
+    "lastName": "Adamu",
+    "email": "shamsu.adamu@switchadvisory.com",
+    "phone": "+234 803 108 0017",
+    "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-switch",
+    "designation": "Reform Advisory Manager",
+    "role": "EMPLOYEE",
+    "accessLevel": "L4",
+    "organizationArm": "SWITCH_ADVISORY",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2021-03-01",
+    "workLocation": "Abuja Head Office (Switch Advisory Wing)",
+    "reportingManagerId": "emp-6",
+    "gradeLevel": "L4 - Senior Staff",
+    "salaryGrade": "SNR-L4",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Married",
+      "nationality": "Nigerian",
+      "address": "Maitama, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN715535392"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Reform Advisory Manager",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-18",
+    "employeeId": "SW-003",
+    "firstName": "Idoko",
+    "lastName": "Salihu",
+    "email": "idoko.salihu@switchadvisory.com",
+    "phone": "+234 803 109 0018",
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-switch",
+    "designation": "Business Development Manager",
+    "role": "EMPLOYEE",
+    "accessLevel": "L4",
+    "organizationArm": "SWITCH_ADVISORY",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2021-06-15",
+    "workLocation": "Abuja Head Office (Switch Advisory Wing)",
+    "reportingManagerId": "emp-6",
+    "gradeLevel": "L4 - Senior Staff",
+    "salaryGrade": "SNR-L4",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Married",
+      "nationality": "Nigerian",
+      "address": "Wuse Zone 4, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN998414907"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Business Development Manager",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-19",
+    "employeeId": "SW-004",
+    "firstName": "Chisom",
+    "lastName": "Okoli",
+    "email": "chisom.okoli@switchadvisory.com",
+    "phone": "+234 803 110 0019",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-switch",
+    "designation": "Project Delivery & Partnerships Associate",
+    "role": "EMPLOYEE",
+    "accessLevel": "L3",
+    "organizationArm": "SWITCH_ADVISORY",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2022-04-01",
+    "workLocation": "Abuja Head Office (Switch Advisory Wing)",
+    "reportingManagerId": "emp-6",
+    "gradeLevel": "L3 - Mid-Level",
+    "salaryGrade": "MID-L3",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Apo Legislative Quarters, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN336755379"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Project Delivery & Partnerships Associate",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-20",
+    "employeeId": "SW-005",
+    "firstName": "Ebunoluwa",
+    "lastName": "Johnson",
+    "email": "ebunoluwa.johnson@switchadvisory.com",
+    "phone": "+234 803 111 0020",
+    "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-switch",
+    "designation": "Programs & Research Coordination Associate",
+    "role": "EMPLOYEE",
+    "accessLevel": "L2",
+    "organizationArm": "SWITCH_ADVISORY",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2023-02-15",
+    "workLocation": "Abuja Head Office (Switch Advisory Wing)",
+    "reportingManagerId": "emp-6",
+    "gradeLevel": "L2 - Junior Staff",
+    "salaryGrade": "JUN-L2",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Utako District, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN455960770"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Programs & Research Coordination Associate",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-21",
+    "employeeId": "SW-006",
+    "firstName": "Peace",
+    "lastName": "Okeke",
+    "email": "peace.okeke@switchadvisory.com",
+    "phone": "+234 803 112 0021",
+    "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-switch",
+    "designation": "Programs Officer",
+    "role": "EMPLOYEE",
+    "accessLevel": "L1",
+    "organizationArm": "SWITCH_ADVISORY",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2023-08-01",
+    "workLocation": "Abuja Head Office (Switch Advisory Wing)",
+    "reportingManagerId": "emp-6",
+    "gradeLevel": "L1 - Entry Level",
+    "salaryGrade": "ENT-L1",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Lokogoma, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN509424756"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Programs Officer",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-22",
+    "employeeId": "SW-007",
+    "firstName": "Praise",
+    "lastName": "Emerhirhi",
+    "email": "praise.emerhirhi@switchadvisory.com",
+    "phone": "+234 803 113 0022",
+    "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-switch",
+    "designation": "Programs Officer",
+    "role": "EMPLOYEE",
+    "accessLevel": "L1",
+    "organizationArm": "SWITCH_ADVISORY",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2023-08-15",
+    "workLocation": "Abuja Head Office (Switch Advisory Wing)",
+    "reportingManagerId": "emp-6",
+    "gradeLevel": "L1 - Entry Level",
+    "salaryGrade": "ENT-L1",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Lugbe, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN569203498"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Programs Officer",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-23",
+    "employeeId": "SW-008",
+    "firstName": "Joseph",
+    "lastName": "Igboanua",
+    "email": "joseph.igboanua@switchadvisory.com",
+    "phone": "+234 803 114 0023",
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-switch",
+    "designation": "Research Officer (Public Sector Policy)",
+    "role": "EMPLOYEE",
+    "accessLevel": "L1",
+    "organizationArm": "SWITCH_ADVISORY",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2023-11-01",
+    "workLocation": "Abuja Head Office (Switch Advisory Wing)",
+    "reportingManagerId": "emp-6",
+    "gradeLevel": "L1 - Entry Level",
+    "salaryGrade": "ENT-L1",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Jahi, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN153847061"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Research Officer (Public Sector Policy)",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-24",
+    "employeeId": "CISD-006",
+    "firstName": "Job",
+    "lastName": "Olaniran",
+    "email": "job.olaniran@cisdialogue.org",
+    "phone": "+234 803 115 0024",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-cisd",
+    "designation": "Policy Dialogue Associate",
+    "role": "EMPLOYEE",
+    "accessLevel": "L3",
+    "organizationArm": "CISD",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2022-05-15",
+    "workLocation": "Abuja Head Office (CISD Wing)",
+    "reportingManagerId": "emp-7",
+    "gradeLevel": "L3 - Mid-Level",
+    "salaryGrade": "MID-L3",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Garki 2, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN595126023"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Policy Dialogue Associate",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-25",
+    "employeeId": "CISD-007",
+    "firstName": "Tobechukwu",
+    "lastName": "Ezeuko",
+    "email": "tobechukwu.ezeuko@cisdialogue.org",
+    "phone": "+234 803 116 0025",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-cisd",
+    "designation": "Research Assistant",
+    "role": "EMPLOYEE",
+    "accessLevel": "L1",
+    "organizationArm": "CISD",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2023-10-01",
+    "workLocation": "Abuja Head Office (CISD Wing)",
+    "reportingManagerId": "emp-7",
+    "gradeLevel": "L1 - Entry Level",
+    "salaryGrade": "ENT-L1",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Karu, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN672681464"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Research Assistant",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-26",
+    "employeeId": "CISD-008",
+    "firstName": "Kareem",
+    "lastName": "Rasaq",
+    "email": "kareem.rasaq@cisdialogue.org",
+    "phone": "+234 803 117 0026",
+    "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-cisd",
+    "designation": "Field Operations Coordinator",
+    "role": "EMPLOYEE",
+    "accessLevel": "L1",
+    "organizationArm": "CISD",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2023-10-15",
+    "workLocation": "Abuja Head Office (CISD Wing)",
+    "reportingManagerId": "emp-7",
+    "gradeLevel": "L1 - Entry Level",
+    "salaryGrade": "ENT-L1",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Nyanya, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN898816003"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Field Operations Coordinator",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-27",
+    "employeeId": "CISD-009",
+    "firstName": "Olowonisi Bolanle",
+    "lastName": "John",
+    "email": "bolanle.john@cisdialogue.org",
+    "phone": "+234 803 118 0027",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-cisd",
+    "designation": "Community Engagement Associate",
+    "role": "EMPLOYEE",
+    "accessLevel": "L1",
+    "organizationArm": "CISD",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2023-11-15",
+    "workLocation": "Abuja Head Office (CISD Wing)",
+    "reportingManagerId": "emp-7",
+    "gradeLevel": "L1 - Entry Level",
+    "salaryGrade": "ENT-L1",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Mpape, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN393418439"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Community Engagement Associate",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-28",
+    "employeeId": "CISD-010",
+    "firstName": "Martha",
+    "lastName": "Micheal",
+    "email": "martha.micheal@cisdialogue.org",
+    "phone": "+234 803 119 0028",
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-cisd",
+    "designation": "Facilities & Services Specialist",
+    "role": "EMPLOYEE",
+    "accessLevel": "L1",
+    "organizationArm": "CISD",
+    "status": "ACTIVE",
+    "employmentType": "FULL_TIME",
+    "joinDate": "2022-01-05",
+    "workLocation": "Abuja Head Office (CISD Wing)",
+    "reportingManagerId": "emp-2",
+    "gradeLevel": "L1 - Entry Level",
+    "salaryGrade": "ENT-L1",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Married",
+      "nationality": "Nigerian",
+      "address": "Mararaba, Abuja Outskirts",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN341842873"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Facilities & Services Specialist",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-29",
+    "employeeId": "CISD-011",
+    "firstName": "Ali",
+    "lastName": "Julianah",
+    "email": "ali.julianah@cisdialogue.org",
+    "phone": "+234 803 120 0029",
+    "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-cisd",
+    "designation": "Undergraduate Intern (Social Development)",
+    "role": "EMPLOYEE",
+    "accessLevel": "L0",
+    "organizationArm": "CISD",
+    "status": "ACTIVE",
+    "employmentType": "INTERN",
+    "joinDate": "2024-05-01",
+    "workLocation": "Abuja Head Office (CISD Wing)",
+    "reportingManagerId": "emp-7",
+    "gradeLevel": "L0 - Intern",
+    "salaryGrade": "INT-L0",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Female",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Gwagwalada, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN565924014"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Undergraduate Intern (Social Development)",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
+  },
+  {
+    "id": "emp-30",
+    "employeeId": "CISD-012",
+    "firstName": "Akpabot",
+    "lastName": "Bright",
+    "email": "akpabot.bright@cisdialogue.org",
+    "phone": "+234 803 121 0030",
+    "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80",
+    "departmentId": "dept-cisd",
+    "designation": "Undergraduate Intern (Research & Field)",
+    "role": "EMPLOYEE",
+    "accessLevel": "L0",
+    "organizationArm": "CISD",
+    "status": "ACTIVE",
+    "employmentType": "INTERN",
+    "joinDate": "2024-05-01",
+    "workLocation": "Abuja Head Office (CISD Wing)",
+    "reportingManagerId": "emp-7",
+    "gradeLevel": "L0 - Intern",
+    "salaryGrade": "INT-L0",
+    "personalInfo": {
+      "dob": "1992-05-14",
+      "gender": "Male",
+      "maritalStatus": "Single",
+      "nationality": "Nigerian",
+      "address": "Bwari, Abuja",
+      "bloodGroup": "O+",
+      "ninOrPassport": "NIN790514971"
+    },
+    "education": [
+      {
+        "degree": "B.Sc. Degree",
+        "institution": "University of Abuja",
+        "year": "2016",
+        "field": "Social Sciences & Administration"
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Institutional Operations Group",
+        "role": "Undergraduate Intern (Research & Field)",
+        "fromYear": "2019",
+        "toYear": "Present",
+        "highlights": "Strategic project execution and institutional deliverables."
+      }
+    ],
+    "emergencyContacts": [
+      {
+        "name": "Family Emergency Contact",
+        "relationship": "Next of Kin",
+        "phone": "+234 802 000 9999",
+        "email": "nextofkin@cisdialogue.org"
+      }
+    ],
+    "dependants": []
   }
 ];
 
@@ -846,21 +1999,366 @@ export const initialAttendanceCorrections: AttendanceCorrection[] = [
 ];
 
 export const initialLeaveBalances: LeaveBalance[] = [
-  { employeeId: 'emp-1', annualTotal: 25, annualUsed: 8, sickTotal: 12, sickUsed: 1, casualTotal: 5, casualUsed: 1, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-2', annualTotal: 25, annualUsed: 12, sickTotal: 12, sickUsed: 2, casualTotal: 5, casualUsed: 2, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-3', annualTotal: 25, annualUsed: 6, sickTotal: 12, sickUsed: 0, casualTotal: 5, casualUsed: 1, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-4', annualTotal: 25, annualUsed: 10, sickTotal: 12, sickUsed: 3, casualTotal: 5, casualUsed: 0, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-5', annualTotal: 22, annualUsed: 7, sickTotal: 12, sickUsed: 1, casualTotal: 5, casualUsed: 2, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-6', annualTotal: 22, annualUsed: 5, sickTotal: 12, sickUsed: 0, casualTotal: 5, casualUsed: 1, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-7', annualTotal: 21, annualUsed: 9, sickTotal: 12, sickUsed: 0, casualTotal: 5, casualUsed: 0, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-8', annualTotal: 21, annualUsed: 4, sickTotal: 12, sickUsed: 1, casualTotal: 5, casualUsed: 1, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-9', annualTotal: 21, annualUsed: 8, sickTotal: 12, sickUsed: 0, casualTotal: 5, casualUsed: 2, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-10', annualTotal: 21, annualUsed: 11, sickTotal: 12, sickUsed: 2, casualTotal: 5, casualUsed: 1, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-11', annualTotal: 21, annualUsed: 3, sickTotal: 12, sickUsed: 0, casualTotal: 5, casualUsed: 0, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-12', annualTotal: 21, annualUsed: 2, sickTotal: 12, sickUsed: 0, casualTotal: 5, casualUsed: 1, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-13', annualTotal: 21, annualUsed: 5, sickTotal: 12, sickUsed: 1, casualTotal: 5, casualUsed: 0, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-14', annualTotal: 14, annualUsed: 0, sickTotal: 8, sickUsed: 0, casualTotal: 3, casualUsed: 0, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 },
-  { employeeId: 'emp-15', annualTotal: 21, annualUsed: 1, sickTotal: 12, sickUsed: 0, casualTotal: 5, casualUsed: 0, maternityPaternityTotal: 0, maternityPaternityUsed: 0, unpaidUsed: 0 }
+  {
+    "employeeId": "emp-1",
+    "annualTotal": 25,
+    "annualUsed": 1,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-2",
+    "annualTotal": 21,
+    "annualUsed": 1,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-3",
+    "annualTotal": 21,
+    "annualUsed": 2,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-4",
+    "annualTotal": 21,
+    "annualUsed": 0,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-5",
+    "annualTotal": 24,
+    "annualUsed": 1,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-6",
+    "annualTotal": 24,
+    "annualUsed": 4,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-7",
+    "annualTotal": 24,
+    "annualUsed": 1,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-8",
+    "annualTotal": 21,
+    "annualUsed": 3,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-9",
+    "annualTotal": 21,
+    "annualUsed": 2,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-10",
+    "annualTotal": 21,
+    "annualUsed": 3,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-11",
+    "annualTotal": 21,
+    "annualUsed": 3,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-12",
+    "annualTotal": 21,
+    "annualUsed": 0,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-13",
+    "annualTotal": 21,
+    "annualUsed": 3,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-14",
+    "annualTotal": 21,
+    "annualUsed": 4,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-15",
+    "annualTotal": 21,
+    "annualUsed": 1,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-16",
+    "annualTotal": 21,
+    "annualUsed": 3,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-17",
+    "annualTotal": 21,
+    "annualUsed": 4,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-18",
+    "annualTotal": 21,
+    "annualUsed": 0,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-19",
+    "annualTotal": 21,
+    "annualUsed": 3,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-20",
+    "annualTotal": 21,
+    "annualUsed": 2,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-21",
+    "annualTotal": 21,
+    "annualUsed": 0,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-22",
+    "annualTotal": 21,
+    "annualUsed": 2,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-23",
+    "annualTotal": 21,
+    "annualUsed": 0,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-24",
+    "annualTotal": 21,
+    "annualUsed": 1,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-25",
+    "annualTotal": 21,
+    "annualUsed": 4,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-26",
+    "annualTotal": 21,
+    "annualUsed": 3,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-27",
+    "annualTotal": 21,
+    "annualUsed": 0,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-28",
+    "annualTotal": 21,
+    "annualUsed": 4,
+    "sickTotal": 12,
+    "sickUsed": 1,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-29",
+    "annualTotal": 21,
+    "annualUsed": 1,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 0,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  },
+  {
+    "employeeId": "emp-30",
+    "annualTotal": 21,
+    "annualUsed": 1,
+    "sickTotal": 12,
+    "sickUsed": 0,
+    "casualTotal": 5,
+    "casualUsed": 1,
+    "maternityPaternityTotal": 0,
+    "maternityPaternityUsed": 0,
+    "unpaidUsed": 0
+  }
 ];
 
 export const initialLeaveRequests: LeaveRequest[] = [
@@ -908,180 +2406,334 @@ export const initialLeaveRequests: LeaveRequest[] = [
 
 export const initialHybridSchedules: HybridSchedule[] = [
   {
-    id: 'sch-1',
-    employeeId: 'emp-1',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'OFFICE',
-    thursday: 'OFFICE',
-    friday: 'REMOTE',
-    status: 'ACTIVE'
+    "id": "sch-1",
+    "employeeId": "emp-1",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "OFFICE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-2',
-    employeeId: 'emp-2',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'REMOTE',
-    thursday: 'OFFICE',
-    friday: 'OFFICE',
-    status: 'ACTIVE'
+    "id": "sch-2",
+    "employeeId": "emp-2",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-3',
-    employeeId: 'emp-3',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'OFFICE',
-    thursday: 'REMOTE',
-    friday: 'OFFICE',
-    status: 'ACTIVE'
+    "id": "sch-3",
+    "employeeId": "emp-3",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-4',
-    employeeId: 'emp-4',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'OFFICE',
-    thursday: 'OFFICE',
-    friday: 'REMOTE',
-    status: 'ACTIVE'
+    "id": "sch-4",
+    "employeeId": "emp-4",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-5',
-    employeeId: 'emp-5',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'REMOTE',
-    wednesday: 'OFFICE',
-    thursday: 'OFFICE',
-    friday: 'REMOTE',
-    status: 'ACTIVE'
+    "id": "sch-5",
+    "employeeId": "emp-5",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-6',
-    employeeId: 'emp-6',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'OFFICE',
-    thursday: 'OFFICE',
-    friday: 'REMOTE',
-    status: 'ACTIVE'
+    "id": "sch-6",
+    "employeeId": "emp-6",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-7',
-    employeeId: 'emp-7',
-    weekStartDate: '2026-11-02',
-    monday: 'REMOTE',
-    tuesday: 'REMOTE',
-    wednesday: 'OFFICE',
-    thursday: 'REMOTE',
-    friday: 'REMOTE',
-    status: 'ACTIVE'
+    "id": "sch-7",
+    "employeeId": "emp-7",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "OFFICE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-8',
-    employeeId: 'emp-8',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'OFFICE',
-    thursday: 'REMOTE',
-    friday: 'OFFICE',
-    status: 'ACTIVE'
+    "id": "sch-8",
+    "employeeId": "emp-8",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-9',
-    employeeId: 'emp-9',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'REMOTE',
-    thursday: 'REMOTE',
-    friday: 'OFFICE',
-    status: 'ACTIVE',
-    changeRequests: [
-      {
-        id: 'cr-1',
-        targetDate: '2026-11-06',
-        originalStatus: 'OFFICE',
-        requestedStatus: 'REMOTE',
-        reason: 'Consolidating donor financial files from home workspace.',
-        status: 'PENDING',
-        appliedAt: '2026-11-04'
-      }
-    ]
+    "id": "sch-9",
+    "employeeId": "emp-9",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-10',
-    employeeId: 'emp-10',
-    weekStartDate: '2026-11-02',
-    monday: 'REMOTE',
-    tuesday: 'REMOTE',
-    wednesday: 'REMOTE',
-    thursday: 'REMOTE',
-    friday: 'REMOTE',
-    status: 'ACTIVE'
+    "id": "sch-10",
+    "employeeId": "emp-10",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-11',
-    employeeId: 'emp-11',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'OFFICE',
-    thursday: 'OFFICE',
-    friday: 'OFFICE',
-    status: 'ACTIVE'
+    "id": "sch-11",
+    "employeeId": "emp-11",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-12',
-    employeeId: 'emp-12',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'REMOTE',
-    wednesday: 'OFFICE',
-    thursday: 'OFFICE',
-    friday: 'OFFICE',
-    status: 'ACTIVE'
+    "id": "sch-12",
+    "employeeId": "emp-12",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-13',
-    employeeId: 'emp-13',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'OFFICE',
-    thursday: 'REMOTE',
-    friday: 'OFFICE',
-    status: 'ACTIVE'
+    "id": "sch-13",
+    "employeeId": "emp-13",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-14',
-    employeeId: 'emp-14',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'OFFICE',
-    thursday: 'OFFICE',
-    friday: 'REMOTE',
-    status: 'ACTIVE'
+    "id": "sch-14",
+    "employeeId": "emp-14",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   },
   {
-    id: 'sch-15',
-    employeeId: 'emp-15',
-    weekStartDate: '2026-11-02',
-    monday: 'OFFICE',
-    tuesday: 'OFFICE',
-    wednesday: 'OFFICE',
-    thursday: 'OFFICE',
-    friday: 'REMOTE',
-    status: 'ACTIVE'
+    "id": "sch-15",
+    "employeeId": "emp-15",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-16",
+    "employeeId": "emp-16",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-17",
+    "employeeId": "emp-17",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-18",
+    "employeeId": "emp-18",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-19",
+    "employeeId": "emp-19",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-20",
+    "employeeId": "emp-20",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-21",
+    "employeeId": "emp-21",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-22",
+    "employeeId": "emp-22",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-23",
+    "employeeId": "emp-23",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-24",
+    "employeeId": "emp-24",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-25",
+    "employeeId": "emp-25",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-26",
+    "employeeId": "emp-26",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-27",
+    "employeeId": "emp-27",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-28",
+    "employeeId": "emp-28",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-29",
+    "employeeId": "emp-29",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "sch-30",
+    "employeeId": "emp-30",
+    "weekStartDate": "2026-11-02",
+    "monday": "OFFICE",
+    "tuesday": "REMOTE",
+    "wednesday": "OFFICE",
+    "thursday": "OFFICE",
+    "friday": "REMOTE",
+    "status": "ACTIVE"
   }
 ];
 

@@ -102,11 +102,15 @@ export default function Navbar({ onToggleSidebar, isSidebarCollapsed }: NavbarPr
   };
 
   const availablePersonas = [
-    { empId: 'emp-1', role: 'SUPER_ADMIN' as UserRole, title: 'Dr. Amina Bello', subtitle: 'Executive Director (Super Admin)' },
-    { empId: 'emp-3', role: 'HR_ADMIN' as UserRole, title: 'Olumide Adeyemi', subtitle: 'Director of HR & Admin (HR Admin)' },
-    { empId: 'emp-2', role: 'LINE_MANAGER' as UserRole, title: 'Amb. Ibrahim Mukhtar', subtitle: 'Director of Research (Line Manager)' },
-    { empId: 'emp-7', role: 'EMPLOYEE' as UserRole, title: 'Dr. Chidi Okonkwo', subtitle: 'Senior Fellow (Employee)' },
-    { empId: 'emp-14', role: 'EMPLOYEE' as UserRole, title: 'Aisha Mohammed', subtitle: 'Research Analyst (On Probation)' }
+    { empId: 'emp-1', role: 'EXECUTIVE' as UserRole, title: 'Folahan Johnson (FJ)', subtitle: 'Executive Director (All Arms)' },
+    { empId: 'emp-2', role: 'SUPER_ADMIN' as UserRole, title: 'Yaradua Phibi', subtitle: 'Lead HR Administrator' },
+    { empId: 'emp-3', role: 'HR_ADMIN' as UserRole, title: 'Oluwatosin Onemola (Tosin)', subtitle: 'HR Admin Assistant' },
+    { empId: 'emp-4', role: 'FINANCE' as UserRole, title: 'Victory Kinosi', subtitle: 'Finance & Admin Officer' },
+    { empId: 'emp-5', role: 'LINE_MANAGER' as UserRole, title: 'George Kaduna', subtitle: 'Team Lead: GX Media House' },
+    { empId: 'emp-6', role: 'LINE_MANAGER' as UserRole, title: 'Chinonso Aluma', subtitle: 'Team Lead: Switch Advisory' },
+    { empId: 'emp-7', role: 'LINE_MANAGER' as UserRole, title: 'Marcus Ogunfolaju', subtitle: 'Team Lead: CISD NGO' },
+    { empId: 'emp-9', role: 'EMPLOYEE' as UserRole, title: 'Adebayo Toyosi', subtitle: 'Staff: GX Media (Designer)' },
+    { empId: 'emp-21', role: 'EMPLOYEE' as UserRole, title: 'Peace Okeke', subtitle: 'Staff: Switch Advisory (Programs)' }
   ];
 
   // Global search matching results
@@ -416,8 +420,10 @@ export default function Navbar({ onToggleSidebar, isSidebarCollapsed }: NavbarPr
               <span className="hidden lg:inline font-medium">Role:</span>
               <span className="font-bold text-cisd-navy-950">
                 {currentUser?.role === 'SUPER_ADMIN' ? 'Super Admin' :
-                 currentUser?.role === 'HR_ADMIN' ? 'HR Director' :
-                 currentUser?.role === 'LINE_MANAGER' ? 'Line Manager' : 'Employee'}
+                 currentUser?.role === 'EXECUTIVE' ? 'Executive Director' :
+                 currentUser?.role === 'HR_ADMIN' ? 'HR Operations' :
+                 currentUser?.role === 'FINANCE' ? 'Finance Desk' :
+                 currentUser?.role === 'LINE_MANAGER' ? 'Team Lead' : 'Employee'}
               </span>
               <ChevronDown className="h-3 w-3 text-slate-500" />
             </button>
@@ -453,6 +459,9 @@ export default function Navbar({ onToggleSidebar, isSidebarCollapsed }: NavbarPr
                         onClick={() => {
                           if (emp) {
                             setCurrentUser(emp);
+                            if (typeof window !== 'undefined') {
+                              localStorage.setItem('cisd_session_user_id', emp.id);
+                            }
                             showToast(`Switched active view to ${emp.firstName} ${emp.lastName}`, 'info');
                           }
                           setShowRoleMenu(false);
@@ -484,8 +493,10 @@ export default function Navbar({ onToggleSidebar, isSidebarCollapsed }: NavbarPr
               <Shield className="h-3.5 w-3.5 text-cisd-gold-600" />
               <span className="font-semibold text-cisd-navy-900">
                 {currentUser?.role === 'SUPER_ADMIN' ? 'Super Admin' :
-                 currentUser?.role === 'HR_ADMIN' ? 'HR Director' :
-                 currentUser?.role === 'LINE_MANAGER' ? 'Line Manager' : 'Employee'}
+                 currentUser?.role === 'EXECUTIVE' ? 'Executive Director' :
+                 currentUser?.role === 'HR_ADMIN' ? 'HR Operations' :
+                 currentUser?.role === 'FINANCE' ? 'Finance Desk' :
+                 currentUser?.role === 'LINE_MANAGER' ? 'Team Lead' : 'Employee'}
               </span>
             </div>
             <button

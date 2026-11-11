@@ -69,6 +69,95 @@ export default function Sidebar({ isCollapsed, onSelectTab }: SidebarProps) {
 
   // Build role-tailored navigation groups
   const getNavGroups = (): NavGroup[] => {
+    if (role === 'EXECUTIVE') {
+      return [
+        {
+          group: 'Executive Directorate',
+          items: [
+            { id: 'dashboard', label: 'Executive Command Center', icon: LayoutDashboard },
+            { id: 'profile', label: 'My Profile & Tenure', icon: UserCheck },
+            { id: 'announcements', label: 'Institutional Notices', icon: BellRing, badge: db?.announcements.length }
+          ]
+        },
+        {
+          group: 'Strategic Governance',
+          items: [
+            { id: 'org-chart', label: 'Tripartite Org Hierarchy', icon: Network },
+            { id: 'departments', label: 'Strategic Entities & Arms', icon: Building, count: db?.departments.length },
+            { id: 'employees', label: 'Enterprise Directory', icon: Users, count: db?.employees.length }
+          ]
+        },
+        {
+          group: 'Executive Clearances',
+          items: [
+            { id: 'attendance', label: 'Attendance Intelligence', icon: Clock },
+            {
+              id: 'leave',
+              label: 'Executive Leave Approvals',
+              icon: CalendarDays,
+              badge: allPendingLeaves.length > 0 ? allPendingLeaves.length : undefined,
+              badgeColor: 'bg-amber-500'
+            },
+            {
+              id: 'timesheets',
+              label: 'Timesheets Oversight',
+              icon: Timer,
+              badge: allPendingTimesheets.length > 0 ? allPendingTimesheets.length : undefined,
+              badgeColor: 'bg-indigo-500'
+            },
+            { id: 'hybrid', label: 'Enterprise Hybrid Roster', icon: CalendarRange }
+          ]
+        },
+        {
+          group: 'Strategic Operations & Vault',
+          items: [
+            { id: 'performance', label: 'Strategic KPIs & Reviews', icon: Award },
+            { id: 'tasks', label: 'High-Level Initiatives', icon: CheckSquare, badge: overdueTasks > 0 ? `${overdueTasks} due` : undefined, badgeColor: 'bg-rose-500' },
+            { id: 'meetings', label: 'High-Level Dialogues', icon: MessagesSquare, count: db?.meetings.length },
+            { id: 'documents', label: 'Institutional Vault & Policies', icon: FolderLock },
+            { id: 'reports', label: 'Executive Analytics & Reports', icon: BarChart3 }
+          ]
+        }
+      ];
+    }
+
+    if (role === 'FINANCE') {
+      return [
+        {
+          group: 'Finance & Administration',
+          items: [
+            { id: 'dashboard', label: 'Financial Operations Center', icon: LayoutDashboard },
+            { id: 'profile', label: 'My Profile & Records', icon: UserCheck },
+            { id: 'announcements', label: 'Company Circulars', icon: BellRing, badge: db?.announcements.length }
+          ]
+        },
+        {
+          group: 'Financial Control & Assets',
+          items: [
+            {
+              id: 'timesheets',
+              label: 'Project Hours Accounting',
+              icon: Timer,
+              badge: allPendingTimesheets.length > 0 ? allPendingTimesheets.length : undefined,
+              badgeColor: 'bg-indigo-500'
+            },
+            { id: 'assets', label: 'Assets & Capital Property', icon: Laptop, count: db?.assets.length },
+            { id: 'employees', label: 'Staff Payroll Directory', icon: Users, count: db?.employees.length },
+            { id: 'org-chart', label: 'Company Hierarchy', icon: Network },
+            { id: 'reports', label: 'Financial & Audit Reports', icon: BarChart3 }
+          ]
+        },
+        {
+          group: 'My Time & Records',
+          items: [
+            { id: 'attendance', label: 'Attendance & Clock-In', icon: Clock },
+            { id: 'leave', label: 'My Leave Applications', icon: CalendarDays },
+            { id: 'documents', label: 'Statutory Policies & Vault', icon: FolderLock }
+          ]
+        }
+      ];
+    }
+
     if (role === 'SUPER_ADMIN') {
       return [
         {

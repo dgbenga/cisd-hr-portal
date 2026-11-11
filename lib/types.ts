@@ -1,4 +1,6 @@
-export type UserRole = 'SUPER_ADMIN' | 'HR_ADMIN' | 'LINE_MANAGER' | 'EMPLOYEE';
+export type UserRole = 'SUPER_ADMIN' | 'EXECUTIVE' | 'HR_ADMIN' | 'FINANCE' | 'LINE_MANAGER' | 'EMPLOYEE';
+export type OrganizationArm = 'CISD' | 'SWITCH_ADVISORY' | 'GX_MEDIA' | 'CENTRAL_HOLDING';
+export type AccessLevel = 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 'L7';
 
 export type EmploymentStatus = 'ACTIVE' | 'ON_PROBATION' | 'ON_LEAVE' | 'TERMINATED';
 export type EmploymentType = 'FULL_TIME' | 'CONTRACT' | 'FELLOW' | 'INTERN';
@@ -66,6 +68,8 @@ export interface Employee {
   dependants: Dependant[];
   salaryGrade?: string;
   password?: string; // Custom initial staff password
+  organizationArm?: OrganizationArm;
+  accessLevel?: AccessLevel;
 }
 
 export interface Department {
@@ -76,6 +80,7 @@ export interface Department {
   description: string;
   location: string;
   budget: string;
+  organizationArm?: OrganizationArm;
 }
 
 export type AttendanceStatus = 'PRESENT' | 'LATE' | 'HALF_DAY' | 'REMOTE' | 'ON_LEAVE' | 'ABSENT';
@@ -352,6 +357,7 @@ export interface Announcement {
   publishDate: string;
   authorId: string;
   targetDepartmentId?: string;
+  targetArm?: OrganizationArm;
   acknowledgeCount: number;
 }
 

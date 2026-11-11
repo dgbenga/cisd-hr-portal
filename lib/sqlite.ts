@@ -120,7 +120,8 @@ function initSqliteSchema(db: Database.Database): void {
       head_id TEXT,
       description TEXT,
       location TEXT,
-      budget TEXT
+      budget TEXT,
+      organization_arm TEXT
     );
 
     -- 2. EMPLOYEES
@@ -144,6 +145,8 @@ function initSqliteSchema(db: Database.Database): void {
       grade_level TEXT,
       salary_grade TEXT,
       password TEXT,
+      organization_arm TEXT,
+      access_level TEXT,
       personal_info TEXT,
       education TEXT,
       work_experience TEXT,
@@ -372,6 +375,7 @@ function initSqliteSchema(db: Database.Database): void {
       publish_date TEXT NOT NULL,
       author_id TEXT NOT NULL,
       target_department_id TEXT,
+      target_arm TEXT,
       acknowledge_count INTEGER DEFAULT 0
     );
 
@@ -414,17 +418,33 @@ function initSqliteSchema(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_audit_time ON system_audit_logs(timestamp);
   `);
 
-  // Migration: Ensure password column exists on employees table
-  try {
-    db.exec('ALTER TABLE employees ADD COLUMN password TEXT;');
-  } catch (err) {
-    // Column already exists
-  }
+  // Migrations: Ensure newer columns exist
+  try { db.exec('ALTER TABLE employees ADD COLUMN password TEXT;'); } catch (_) {}
+  try { db.exec('ALTER TABLE employees ADD COLUMN organization_arm TEXT;'); } catch (_) {}
+  try { db.exec('ALTER TABLE employees ADD COLUMN access_level TEXT;'); } catch (_) {}
+  try { db.exec('ALTER TABLE departments ADD COLUMN organization_arm TEXT;'); } catch (_) {}
+  try { db.exec('ALTER TABLE announcements ADD COLUMN target_arm TEXT;'); } catch (_) {}
 
-  // Auto-seed if database is freshly created
+  // Auto-seed or upgrade migration
+  let shouldReseed = false;
   const count = db.prepare('SELECT count(*) as c FROM employees').get() as { c: number };
   if (count.c === 0) {
+    shouldReseed = true;
+  } else {
+    // Check if legacy persona 'Dr. Amina' exists
+    const legacy = db.prepare("SELECT count(*) as c FROM employees WHERE email = 'amina.bello@cisdialogue.org'").get() as { c: number };
+    if (legacy.c > 0) {
+      shouldReseed = true;
+    }
+  }
+
+  if (shouldReseed) {
+    console.log('[CISD SQLite Migration] Seeding tripartite organization roster (Switch, CISD, GX Media)...');
     seedSqliteDatabase(db);
+    try {
+      db.pragma('user_version = 1');
+      db.pragma('wal_checkpoint(TRUNCATE)');
+    } catch (_) {}
   }
 }
 
@@ -457,11 +477,11 @@ export function seedSqliteDatabase(db: Database.Database): void {
 
     // 1. Departments
     const insertDept = db.prepare(`
-      INSERT INTO departments (id, name, code, head_id, description, location, budget)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO departments (id, name, code, head_id, description, location, budget, organization_arm)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const d of initialDepartments) {
-      insertDept.run(d.id, d.name, d.code, d.headId, d.description, d.location, d.budget);
+      insertDept.run(d.id, d.name, d.code, d.headId, d.description, d.location, d.budget, d.organizationArm || null);
     }
 
     // 2. Employees
@@ -470,8 +490,8 @@ export function seedSqliteDatabase(db: Database.Database): void {
         id, employee_id, first_name, last_name, email, phone, avatar,
         department_id, designation, role, status, employment_type, join_date,
         probation_end_date, work_location, reporting_manager_id, grade_level,
-        salary_grade, password, personal_info, education, work_experience, emergency_contacts, dependants
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        salary_grade, password, organization_arm, access_level, personal_info, education, work_experience, emergency_contacts, dependants
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const e of initialEmployees) {
       insertEmp.run(
@@ -480,6 +500,8 @@ export function seedSqliteDatabase(db: Database.Database): void {
         e.probationEndDate || null, e.workLocation, e.reportingManagerId || null, e.gradeLevel,
         e.salaryGrade || null,
         e.password || null,
+        e.organizationArm || null,
+        e.accessLevel || null,
         JSON.stringify(e.personalInfo),
         JSON.stringify(e.education),
         JSON.stringify(e.workExperience),
@@ -653,13 +675,13 @@ export function seedSqliteDatabase(db: Database.Database): void {
     // 17. Announcements
     const insertAnn = db.prepare(`
       INSERT INTO announcements (
-        id, title, category, content, priority, publish_date, author_id, target_department_id, acknowledge_count
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, title, category, content, priority, publish_date, author_id, target_department_id, target_arm, acknowledge_count
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const an of initialAnnouncements) {
       insertAnn.run(
         an.id, an.title, an.category, an.content, an.priority, an.publishDate, an.authorId,
-        an.targetDepartmentId || null, an.acknowledgeCount
+        an.targetDepartmentId || null, an.targetArm || null, an.acknowledgeCount
       );
     }
 
@@ -711,7 +733,8 @@ export function getSqliteDatabaseSnapshot(): DatabaseSchema {
     headId: r.head_id || '',
     description: r.description || '',
     location: r.location || '',
-    budget: r.budget || ''
+    budget: r.budget || '',
+    organizationArm: r.organization_arm || undefined
   }));
 
   // 2. Employees
@@ -727,6 +750,8 @@ export function getSqliteDatabaseSnapshot(): DatabaseSchema {
     departmentId: r.department_id || '',
     designation: r.designation,
     role: r.role,
+    accessLevel: r.access_level || undefined,
+    organizationArm: r.organization_arm || undefined,
     status: r.status,
     employmentType: r.employment_type,
     joinDate: r.join_date,
@@ -979,6 +1004,7 @@ export function getSqliteDatabaseSnapshot(): DatabaseSchema {
     publishDate: r.publish_date,
     authorId: r.author_id,
     targetDepartmentId: r.target_department_id || undefined,
+    targetArm: r.target_arm || undefined,
     acknowledgeCount: r.acknowledge_count
   }));
 
@@ -1068,11 +1094,11 @@ export function saveDatabaseSnapshotToSqlite(data: DatabaseSchema): void {
     // 1. Departments
     db.prepare('DELETE FROM departments').run();
     const insertDept = db.prepare(`
-      INSERT INTO departments (id, name, code, head_id, description, location, budget)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO departments (id, name, code, head_id, description, location, budget, organization_arm)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const d of data.departments || []) {
-      insertDept.run(d.id, d.name, d.code, d.headId || null, d.description || null, d.location || null, d.budget || null);
+      insertDept.run(d.id, d.name, d.code, d.headId || null, d.description || null, d.location || null, d.budget || null, d.organizationArm || null);
     }
 
     // 2. Employees
@@ -1082,8 +1108,8 @@ export function saveDatabaseSnapshotToSqlite(data: DatabaseSchema): void {
         id, employee_id, first_name, last_name, email, phone, avatar,
         department_id, designation, role, status, employment_type, join_date,
         probation_end_date, work_location, reporting_manager_id, grade_level,
-        salary_grade, password, personal_info, education, work_experience, emergency_contacts, dependants
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        salary_grade, password, organization_arm, access_level, personal_info, education, work_experience, emergency_contacts, dependants
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const e of data.employees || []) {
       insertEmp.run(
@@ -1092,6 +1118,8 @@ export function saveDatabaseSnapshotToSqlite(data: DatabaseSchema): void {
         e.probationEndDate || null, e.workLocation || null, e.reportingManagerId || null, e.gradeLevel || null,
         e.salaryGrade || null,
         e.password || null,
+        e.organizationArm || null,
+        e.accessLevel || null,
         JSON.stringify(e.personalInfo || {}),
         JSON.stringify(e.education || []),
         JSON.stringify(e.workExperience || []),
@@ -1280,13 +1308,13 @@ export function saveDatabaseSnapshotToSqlite(data: DatabaseSchema): void {
     db.prepare('DELETE FROM announcements').run();
     const insertAnn = db.prepare(`
       INSERT INTO announcements (
-        id, title, category, content, priority, publish_date, author_id, target_department_id, acknowledge_count
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, title, category, content, priority, publish_date, author_id, target_department_id, target_arm, acknowledge_count
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const an of data.announcements || []) {
       insertAnn.run(
         an.id, an.title, an.category, an.content, an.priority, an.publishDate, an.authorId,
-        an.targetDepartmentId || null, an.acknowledgeCount || 0
+        an.targetDepartmentId || null, an.targetArm || null, an.acknowledgeCount || 0
       );
     }
 

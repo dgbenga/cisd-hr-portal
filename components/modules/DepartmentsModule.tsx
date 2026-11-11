@@ -22,7 +22,7 @@ import {
 export default function DepartmentsModule() {
   const { db, currentUser, setSelectedEmployeeIdForModal, setActiveTab, dispatch, showToast } = usePortal();
   const [selectedDeptId, setSelectedDeptId] = useState<string>(
-    currentUser.departmentId ? currentUser.departmentId : 'dept-2'
+    currentUser?.departmentId ? currentUser.departmentId : (db?.departments?.[0]?.id || 'dept-cisd')
   );
 
   const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
@@ -31,7 +31,7 @@ export default function DepartmentsModule() {
   const [showAddDeptModal, setShowAddDeptModal] = useState(false);
   const [deptName, setDeptName] = useState('');
   const [deptCode, setDeptCode] = useState('');
-  const [deptHeadId, setDeptHeadId] = useState('emp-2');
+  const [deptHeadId, setDeptHeadId] = useState('emp-phibi');
   const [deptLocation, setDeptLocation] = useState('Floor 3, Diplomatic Wing, Abuja HQ');
   const [deptDescription, setDeptDescription] = useState('');
 
