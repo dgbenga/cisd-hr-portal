@@ -91,10 +91,15 @@ export async function POST(req: NextRequest) {
         const nextNum = db.employees.length + 1;
         const employeeCode = `CISD-${nextNum < 10 ? '00' : nextNum < 100 ? '0' : ''}${nextNum}`;
 
+        const dept = db.departments.find(d => d.id === payload.departmentId);
+        const derivedArm = payload.organizationArm || dept?.organizationArm || 'CENTRAL_HOLDING';
+
         const newEmp: Employee = {
           ...payload,
           id: `emp-${Date.now()}`,
           employeeId: payload.employeeId || employeeCode,
+          organizationArm: derivedArm,
+          accessLevel: payload.accessLevel || 'L1',
           status: payload.status || 'ACTIVE',
           role: payload.role || 'EMPLOYEE',
           password: payload.password || 'CISD@2026'
@@ -487,9 +492,11 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        const applicantEmp = db.employees.find(e => e.id === payload.employeeId);
         const newLeave: LeaveRequest = {
           id: `leave-${Date.now()}`,
           employeeId: payload.employeeId,
+          organizationArm: applicantEmp?.organizationArm || 'CENTRAL_HOLDING',
           leaveType: payload.leaveType,
           startDate: payload.startDate,
           endDate: payload.endDate,
@@ -514,9 +521,33 @@ export async function POST(req: NextRequest) {
       }
 
       case 'REVIEW_LEAVE': {
-        requireRoles(['SUPER_ADMIN', 'HR_ADMIN', 'LINE_MANAGER'], 'Adjudicating leave applications');
+        requireRoles(['SUPER_ADMIN', 'EXECUTIVE', 'HR_ADMIN', 'LINE_MANAGER'], 'Adjudicating leave applications');
         const leave = db.leaveRequests.find(l => l.id === payload.id);
         if (!leave) return NextResponse.json({ success: false, error: 'Leave request not found' }, { status: 404 });
+
+        // Anti-self-approval guard
+        if (leave.employeeId === currentUserId) {
+          return NextResponse.json({
+            success: false,
+            error: 'Self-adjudication prohibited: You cannot approve or reject your own leave request.'
+          }, { status: 400 });
+        }
+
+        // BOLA containment check for LINE_MANAGER
+        if (currentUserRole === 'LINE_MANAGER') {
+          const applicant = db.employees.find(e => e.id === leave.employeeId);
+          const reviewer = db.employees.find(e => e.id === currentUserId);
+          const sameArm = applicant?.organizationArm && reviewer?.organizationArm && applicant.organizationArm === reviewer.organizationArm;
+          const isDirectReport = applicant?.reportingManagerId === currentUserId;
+          const sameDept = applicant?.departmentId === reviewer?.departmentId;
+
+          if (!sameArm && !isDirectReport && !sameDept) {
+            return NextResponse.json({
+              success: false,
+              error: 'BOLA Violation: Line managers can only adjudicate leave requests for personnel in their designated sister entity or reporting chain.'
+            }, { status: 403 });
+          }
+        }
 
         leave.status = payload.status;
         leave.approvedBy = currentUserId;
@@ -978,6 +1009,7 @@ export async function POST(req: NextRequest) {
             const nextNum = db.employees.length + 1;
             const employeeCode = `CISD-${nextNum < 10 ? '00' : nextNum < 100 ? '0' : ''}${nextNum}`;
             const job = db.recruitmentJobs.find(j => j.id === cand.jobId);
+            const targetDept = db.departments.find(d => d.id === (job?.departmentId || db.departments[0]?.id));
             const [first, ...lastParts] = cand.fullName.split(' ');
             const lastName = lastParts.join(' ') || 'Staff';
 
@@ -990,6 +1022,8 @@ export async function POST(req: NextRequest) {
               phone: cand.phone || '+234 9 290 8000',
               avatar: `https://images.unsplash.com/photo-${1534528741775 + nextNum}?w=150&auto=format&fit=crop&q=80`,
               departmentId: job?.departmentId || db.departments[0]?.id || 'dept-1',
+              organizationArm: targetDept?.organizationArm || 'CENTRAL_HOLDING',
+              accessLevel: 'L1',
               designation: job?.title || 'Policy Associate',
               role: 'EMPLOYEE',
               status: 'ON_PROBATION',
@@ -998,7 +1032,7 @@ export async function POST(req: NextRequest) {
               probationEndDate: '2027-05-01',
               workLocation: 'Abuja Head Office',
               reportingManagerId: 'emp-1',
-              gradeLevel: 'Grade 7',
+              gradeLevel: 'L1 - Associate Staff',
               personalInfo: {
                 dob: '1995-06-15',
                 gender: 'Female',
@@ -1382,6 +1416,8 @@ export async function POST(req: NextRequest) {
       case 'SUBMIT_TIMESHEET': {
         const empId = payload.employeeId || currentUserId;
         const total = (payload.entries || []).reduce((acc: number, curr: any) => acc + (Number(curr.totalHours) || 0), 0);
+        const empRecord = db.employees.find(e => e.id === empId);
+        const submitArm = empRecord?.organizationArm || 'CENTRAL_HOLDING';
         
         const existingIndex = db.timesheets.findIndex(
           t => (payload.id && t.id === payload.id) || (t.employeeId === empId && t.weekStartDate === payload.weekStartDate)
@@ -1393,6 +1429,7 @@ export async function POST(req: NextRequest) {
         if (existingIndex >= 0) {
           submittedTs = {
             ...db.timesheets[existingIndex],
+            organizationArm: db.timesheets[existingIndex].organizationArm || submitArm,
             weekStartDate: payload.weekStartDate,
             weekEndDate: payload.weekEndDate || db.timesheets[existingIndex].weekEndDate,
             entries: payload.entries || [],
@@ -1405,6 +1442,7 @@ export async function POST(req: NextRequest) {
           submittedTs = {
             id: payload.id || `ts-${Date.now()}`,
             employeeId: empId,
+            organizationArm: submitArm,
             weekStartDate: payload.weekStartDate,
             weekEndDate: payload.weekEndDate || payload.weekStartDate,
             status: 'SUBMITTED',
@@ -1504,9 +1542,33 @@ export async function POST(req: NextRequest) {
       }
 
       case 'REVIEW_TIMESHEET': {
-        requireRoles(['SUPER_ADMIN', 'HR_ADMIN', 'LINE_MANAGER'], 'Adjudicating timesheet logs');
+        requireRoles(['SUPER_ADMIN', 'EXECUTIVE', 'HR_ADMIN', 'LINE_MANAGER'], 'Adjudicating timesheet logs');
         const ts = db.timesheets.find(t => t.id === payload.id);
         if (!ts) return NextResponse.json({ success: false, error: 'Timesheet not found' }, { status: 404 });
+
+        // Anti-self-approval guard
+        if (ts.employeeId === currentUserId) {
+          return NextResponse.json({
+            success: false,
+            error: 'Self-adjudication prohibited: You cannot approve or reject your own timesheet.'
+          }, { status: 400 });
+        }
+
+        // BOLA containment check for LINE_MANAGER
+        if (currentUserRole === 'LINE_MANAGER') {
+          const submitter = db.employees.find(e => e.id === ts.employeeId);
+          const reviewer = db.employees.find(e => e.id === currentUserId);
+          const sameArm = submitter?.organizationArm && reviewer?.organizationArm && submitter.organizationArm === reviewer.organizationArm;
+          const isDirectReport = submitter?.reportingManagerId === currentUserId;
+          const sameDept = submitter?.departmentId === reviewer?.departmentId;
+
+          if (!sameArm && !isDirectReport && !sameDept) {
+            return NextResponse.json({
+              success: false,
+              error: 'BOLA Violation: Line managers can only adjudicate timesheets for personnel in their designated sister entity or reporting chain.'
+            }, { status: 403 });
+          }
+        }
 
         ts.status = payload.status;
         ts.approvedBy = currentUserId;
@@ -1529,6 +1591,7 @@ export async function POST(req: NextRequest) {
       case 'CREATE_DEPARTMENT': {
         requireRoles(['SUPER_ADMIN', 'HR_ADMIN'], 'Creating institutional departments');
         const newDept = {
+          organizationArm: 'CENTRAL_HOLDING' as const,
           ...payload,
           id: `dept-${Date.now()}`
         };

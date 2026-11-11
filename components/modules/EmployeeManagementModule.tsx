@@ -28,12 +28,21 @@ import {
   ShieldAlert,
   Sparkles
 } from 'lucide-react';
-import { Employee, EmploymentStatus, EmploymentType, UserRole } from '@/lib/types';
+import {
+  Employee,
+  EmploymentStatus,
+  EmploymentType,
+  UserRole,
+  OrganizationArm,
+  AccessLevel,
+  getOrganizationArmConfig
+} from '@/lib/types';
 
 export default function EmployeeManagementModule() {
   const { db, currentUser, setSelectedEmployeeIdForModal, dispatch, showToast } = usePortal();
 
   const [viewMode, setViewMode] = useState<'GRID' | 'TABLE'>('GRID');
+  const [filterArm, setFilterArm] = useState<'ALL' | OrganizationArm>('ALL');
   const [filterDept, setFilterDept] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [filterType, setFilterType] = useState('ALL');
@@ -81,14 +90,16 @@ export default function EmployeeManagementModule() {
     email: '',
     password: 'CISD@2026',
     phone: '',
-    departmentId: 'dept-2',
+    departmentId: 'dept-switch',
+    organizationArm: 'SWITCH_ADVISORY' as OrganizationArm,
+    accessLevel: 'L2' as AccessLevel,
     designation: '',
     role: 'EMPLOYEE' as UserRole,
     status: 'ACTIVE' as EmploymentStatus,
     employmentType: 'FULL_TIME' as EmploymentType,
     joinDate: new Date().toISOString().split('T')[0],
     workLocation: 'Abuja Head Office',
-    gradeLevel: 'Officer Level 4',
+    gradeLevel: 'L2 - Officer',
     salaryGrade: 'OFF-O2',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
     dob: '1992-05-10',
@@ -112,6 +123,7 @@ export default function EmployeeManagementModule() {
 
   // Filter & Search logic
   const filteredEmployees = db.employees.filter(emp => {
+    const matchesArm = filterArm === 'ALL' || emp.organizationArm === filterArm;
     const matchesDept = filterDept === 'ALL' || emp.departmentId === filterDept;
     const matchesStatus = filterStatus === 'ALL' || emp.status === filterStatus;
     const matchesType = filterType === 'ALL' || emp.employmentType === filterType;
@@ -122,7 +134,7 @@ export default function EmployeeManagementModule() {
       emp.email.toLowerCase().includes(q) ||
       emp.employeeId.toLowerCase().includes(q) ||
       emp.designation.toLowerCase().includes(q);
-    return matchesDept && matchesStatus && matchesType && matchesSearch;
+    return matchesArm && matchesDept && matchesStatus && matchesType && matchesSearch;
   }).sort((a, b) => {
     if (sortBy === 'NAME') return a.firstName.localeCompare(b.firstName);
     if (sortBy === 'JOIN_DATE') return b.joinDate.localeCompare(a.joinDate);
@@ -138,14 +150,16 @@ export default function EmployeeManagementModule() {
       email: '',
       password: initialPwd,
       phone: '',
-      departmentId: db.departments[0]?.id || 'dept-1',
+      departmentId: db.departments[0]?.id || 'dept-switch',
+      organizationArm: (db.departments[0]?.organizationArm as OrganizationArm) || 'SWITCH_ADVISORY',
+      accessLevel: 'L2',
       designation: '',
       role: 'EMPLOYEE',
       status: 'ACTIVE',
       employmentType: 'FULL_TIME',
       joinDate: new Date().toISOString().split('T')[0],
       workLocation: 'Abuja Head Office',
-      gradeLevel: 'Officer Level 4',
+      gradeLevel: 'L2 - Officer',
       salaryGrade: 'OFF-O2',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       dob: '1992-05-10',
@@ -176,6 +190,8 @@ export default function EmployeeManagementModule() {
       password: emp.password || 'CISD@2026',
       phone: emp.phone,
       departmentId: emp.departmentId,
+      organizationArm: emp.organizationArm || 'CISD',
+      accessLevel: emp.accessLevel || 'L2',
       designation: emp.designation,
       role: emp.role,
       status: emp.status,
@@ -214,6 +230,8 @@ export default function EmployeeManagementModule() {
       password: formData.password,
       phone: formData.phone,
       departmentId: formData.departmentId,
+      organizationArm: formData.organizationArm,
+      accessLevel: formData.accessLevel,
       designation: formData.designation,
       role: formData.role,
       status: formData.status,
@@ -427,6 +445,39 @@ Instructions:
         </div>
       </div>
 
+      {/* Entity Selector Pills Bar */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+        <button
+          onClick={() => setFilterArm('ALL')}
+          className={`rounded-xl px-3.5 py-1.5 font-bold transition whitespace-nowrap shadow-sm ${
+            filterArm === 'ALL'
+              ? 'bg-cisd-navy-900 text-white shadow'
+              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          All Entities ({db.employees.length})
+        </button>
+        {(['SWITCH_ADVISORY', 'CISD', 'GX_MEDIA', 'CENTRAL_HOLDING'] as OrganizationArm[]).map(armKey => {
+          const cfg = getOrganizationArmConfig(armKey);
+          const count = db.employees.filter(e => e.organizationArm === armKey).length;
+          const isSelected = filterArm === armKey;
+          return (
+            <button
+              key={armKey}
+              onClick={() => setFilterArm(armKey)}
+              className={`rounded-xl px-3.5 py-1.5 font-bold transition whitespace-nowrap border ${
+                isSelected
+                  ? `${cfg.badgeClass} ring-2 ring-cisd-navy-900/20 shadow-sm`
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <span className="hidden sm:inline">{cfg.label}</span>
+              <span className="sm:hidden">{cfg.shortLabel}</span> ({count})
+            </button>
+          );
+        })}
+      </div>
+
       {/* Filter and Search Controls */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
         {/* Search */}
@@ -501,17 +552,44 @@ Instructions:
       </div>
 
       {/* Content: Grid vs Table */}
-      {viewMode === 'GRID' ? (
+      {filteredEmployees.length === 0 ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 mb-3">
+            <Users className="h-6 w-6" />
+          </div>
+          <h3 className="font-bold text-slate-800 text-sm">No Personnel Found</h3>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            {filterArm !== 'ALL'
+              ? `No personnel matching the current filter in ${getOrganizationArmConfig(filterArm).label}.`
+              : 'No staff records match your current search and filter criteria.'}
+          </p>
+          {(filterArm !== 'ALL' || filterDept !== 'ALL' || filterStatus !== 'ALL' || filterType !== 'ALL' || search) && (
+            <button
+              onClick={() => {
+                setFilterArm('ALL');
+                setFilterDept('ALL');
+                setFilterStatus('ALL');
+                setFilterType('ALL');
+                setSearch('');
+              }}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-cisd-navy-900 px-4 py-2 text-xs font-bold text-white hover:bg-cisd-navy-800 transition"
+            >
+              Reset All Filters
+            </button>
+          )}
+        </div>
+      ) : viewMode === 'GRID' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredEmployees.map(emp => {
             const dept = db.departments.find(d => d.id === emp.departmentId);
+            const armCfg = getOrganizationArmConfig(emp.organizationArm);
             return (
               <div
                 key={emp.id}
                 className="group relative flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition hover:border-cisd-navy-200"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="flex items-start justify-between gap-3 mb-2">
                     <img
                       src={emp.avatar}
                       alt={emp.firstName}
@@ -528,6 +606,18 @@ Instructions:
                         {emp.status.replace('_', ' ')}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Entity and Access Level Badges */}
+                  <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold border ${armCfg.badgeClass}`}>
+                      {armCfg.shortLabel}
+                    </span>
+                    {emp.accessLevel && (
+                      <span className="rounded-md bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-700">
+                        {emp.accessLevel}
+                      </span>
+                    )}
                   </div>
 
                   <h3
@@ -611,6 +701,7 @@ Instructions:
             <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500">
               <tr>
                 <th className="py-3 px-4">Staff Member</th>
+                <th className="py-3 px-4">Entity & Level</th>
                 <th className="py-3 px-4">Employee ID</th>
                 <th className="py-3 px-4">Department</th>
                 <th className="py-3 px-4">Designation</th>
@@ -622,6 +713,7 @@ Instructions:
             <tbody className="divide-y divide-slate-100">
               {filteredEmployees.map(emp => {
                 const dept = db.departments.find(d => d.id === emp.departmentId);
+                const armCfg = getOrganizationArmConfig(emp.organizationArm);
                 return (
                   <tr key={emp.id} className="hover:bg-slate-50/70 transition">
                     <td className="py-3 px-4">
@@ -638,6 +730,18 @@ Instructions:
                           <p className="font-bold text-slate-900">{emp.firstName} {emp.lastName}</p>
                           <p className="text-[11px] text-slate-400">{emp.email}</p>
                         </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold border ${armCfg.badgeClass}`}>
+                          {armCfg.shortLabel}
+                        </span>
+                        {emp.accessLevel && (
+                          <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-700">
+                            {emp.accessLevel}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="py-3 px-4 font-mono font-bold text-slate-700">{emp.employeeId}</td>
@@ -831,6 +935,36 @@ Instructions:
               <div className="space-y-3 pt-2">
                 <h4 className="font-bold text-slate-900 border-b pb-1 text-xs uppercase text-slate-400">Institutional Role & Placement</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Organization Arm / Entity</label>
+                    <select
+                      value={formData.organizationArm}
+                      onChange={(e) => setFormData({ ...formData, organizationArm: e.target.value as OrganizationArm })}
+                      className="w-full rounded-lg border border-slate-200 p-2 text-xs font-medium"
+                    >
+                      <option value="SWITCH_ADVISORY">Switch Advisory</option>
+                      <option value="CISD">CISD (Inclusive Dialogue)</option>
+                      <option value="GX_MEDIA">GX Media House</option>
+                      <option value="CENTRAL_HOLDING">Central Holding & Governance</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Grade Level (Access Level)</label>
+                    <select
+                      value={formData.accessLevel}
+                      onChange={(e) => setFormData({ ...formData, accessLevel: e.target.value as AccessLevel })}
+                      className="w-full rounded-lg border border-slate-200 p-2 text-xs font-medium"
+                    >
+                      <option value="L0">L0 - Graduate Trainee / Intern</option>
+                      <option value="L1">L1 - Junior Associate</option>
+                      <option value="L2">L2 - Associate / Officer</option>
+                      <option value="L3">L3 - Senior Associate</option>
+                      <option value="L4">L4 - Team Lead / Lead Specialist</option>
+                      <option value="L5">L5 - Principal / Practice Lead</option>
+                      <option value="L6">L6 - Director / Partner</option>
+                      <option value="L7">L7 - Executive Director / C-Suite</option>
+                    </select>
+                  </div>
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">Department</label>
                     <select

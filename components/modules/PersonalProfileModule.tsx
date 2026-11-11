@@ -27,7 +27,7 @@ import {
   Gift,
   PartyPopper
 } from 'lucide-react';
-import { Employee, UserRole } from '@/lib/types';
+import { Employee, UserRole, getOrganizationArmConfig } from '@/lib/types';
 
 // Pre-curated diplomatic portraits for quick selection
 const CURATED_AVATARS = [
@@ -255,6 +255,19 @@ export default function PersonalProfileModule() {
                 <span className="rounded-md bg-white/10 border border-white/20 px-2.5 py-0.5 text-[11px] font-bold text-slate-200">
                   {currentDept?.name}
                 </span>
+                {(() => {
+                  const armCfg = getOrganizationArmConfig(currentEmp.organizationArm);
+                  return (
+                    <span className="rounded-md bg-white/10 border border-white/20 px-2.5 py-0.5 text-[11px] font-bold text-white">
+                      {armCfg.label}
+                    </span>
+                  );
+                })()}
+                {currentEmp.accessLevel && (
+                  <span className="rounded-md bg-cisd-gold-500/30 border border-cisd-gold-400/40 px-2.5 py-0.5 text-[11px] font-mono font-bold text-cisd-gold-200">
+                    {currentEmp.accessLevel}
+                  </span>
+                )}
                 <span className="rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 text-[11px] font-semibold">
                   Active Diplomatic Personnel
                 </span>

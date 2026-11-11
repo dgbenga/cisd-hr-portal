@@ -23,6 +23,7 @@ import {
   Users2,
   Lock
 } from 'lucide-react';
+import { getOrganizationArmConfig } from '@/lib/types';
 
 export default function EmployeeProfileModal() {
   const { db, selectedEmployeeIdForModal, setSelectedEmployeeIdForModal, currentUser } = usePortal();
@@ -80,6 +81,19 @@ export default function EmployeeProfileModal() {
                 }`}>
                   {emp.status.replace('_', ' ')}
                 </span>
+                {(() => {
+                  const armCfg = getOrganizationArmConfig(emp.organizationArm);
+                  return (
+                    <span className="rounded-md bg-white/10 border border-white/20 px-2 py-0.5 text-xs font-semibold text-white">
+                      {armCfg.label}
+                    </span>
+                  );
+                })()}
+                {emp.accessLevel && (
+                  <span className="rounded-md bg-cisd-gold-500/30 border border-cisd-gold-400/40 px-2 py-0.5 text-xs font-mono font-bold text-cisd-gold-200">
+                    {emp.accessLevel}
+                  </span>
+                )}
               </div>
               <p className="text-sm text-slate-300 font-medium">{emp.designation}</p>
               <p className="text-xs text-cisd-gold-300 mt-0.5">{dept?.name} &bull; {emp.gradeLevel}</p>

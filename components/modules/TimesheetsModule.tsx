@@ -22,7 +22,7 @@ import {
   Check,
   Briefcase
 } from 'lucide-react';
-import { Timesheet, TimesheetEntry } from '@/lib/types';
+import { Timesheet, TimesheetEntry, OrganizationArm, getOrganizationArmConfig } from '@/lib/types';
 
 export default function TimesheetsModule() {
   const { db, currentUser, dispatch, showToast } = usePortal();
@@ -37,6 +37,7 @@ export default function TimesheetsModule() {
 
   const [selectedWeek, setSelectedWeek] = useState('2026-11-02');
   const [activeTab, setActiveTab] = useState<'my_timesheet' | 'team_queue' | 'history'>('my_timesheet');
+  const [queueFilterArm, setQueueFilterArm] = useState<'ALL' | OrganizationArm>('ALL');
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -59,7 +60,7 @@ export default function TimesheetsModule() {
   if (!db || !currentUser) return null;
 
   const role = currentUser.role || 'EMPLOYEE';
-  const isExecutiveOrHR = role === 'SUPER_ADMIN' || role === 'HR_ADMIN';
+  const isExecutiveOrHR = role === 'SUPER_ADMIN' || role === 'EXECUTIVE' || role === 'HR_ADMIN';
   const isTeamLead = role === 'LINE_MANAGER';
   const canManageTeam = isExecutiveOrHR || isTeamLead;
 
@@ -94,19 +95,38 @@ export default function TimesheetsModule() {
   // Calculate current week hours
   const totalWeeklyHours = entries.reduce((acc, curr) => acc + (Number(curr.totalHours) || 0), 0);
 
-  // Filter team members based on department or enterprise scope
+  // Filter team members based on organization arm or reporting chain
   const teamEmployees = isExecutiveOrHR
     ? db.employees
-    : db.employees.filter(e => e.departmentId === currentUser.departmentId);
+    : db.employees.filter(e =>
+        (e.organizationArm && currentUser.organizationArm && e.organizationArm === currentUser.organizationArm) ||
+        e.departmentId === currentUser.departmentId ||
+        e.reportingManagerId === currentUser.id
+      );
 
   const teamMemberIds = teamEmployees.map(e => e.id);
 
-  // Pending timesheets for approval
+  // Pending timesheets for approval with anti-self-approval and arm scoping
   const pendingTimesheets = !canManageTeam
     ? []
     : isTeamLead
-    ? (db.timesheets || []).filter(t => t.status === 'SUBMITTED' && teamMemberIds.includes(t.employeeId) && t.employeeId !== currentUser.id)
-    : (db.timesheets || []).filter(t => t.status === 'SUBMITTED');
+    ? (db.timesheets || []).filter(t => {
+        if (t.status !== 'SUBMITTED') return false;
+        if (t.employeeId === currentUser.id) return false;
+        const submitter = db.employees.find(e => e.id === t.employeeId);
+        const sameArm = submitter?.organizationArm && currentUser.organizationArm && submitter.organizationArm === currentUser.organizationArm;
+        const isReport = submitter?.reportingManagerId === currentUser.id;
+        const sameDept = submitter?.departmentId === currentUser.departmentId;
+        return sameArm || isReport || sameDept;
+      })
+    : (db.timesheets || []).filter(t => {
+        if (t.status !== 'SUBMITTED') return false;
+        if (t.employeeId === currentUser.id) return false;
+        if (queueFilterArm === 'ALL') return true;
+        const submitter = db.employees.find(e => e.id === t.employeeId);
+        const recordArm = t.organizationArm || submitter?.organizationArm;
+        return recordArm === queueFilterArm;
+      });
 
   // Timesheet history for current user
   const userTimesheetHistory = (db.timesheets || []).filter(t => t.employeeId === currentUser.id);
@@ -626,31 +646,80 @@ export default function TimesheetsModule() {
       {activeTab === 'team_queue' && canManageTeam && (
         <div className="space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
               <div>
                 <h3 className="font-bold text-slate-900 text-sm">
                   {isTeamLead ? 'Directorate Action: Team Timesheet Adjudication' : 'Institutional Timesheet Review Queue'}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Review and sign off on project hours submitted across your team
+                  {isTeamLead
+                    ? `Reviewing submitted deliverables for ${getOrganizationArmConfig(currentUser.organizationArm).label}`
+                    : 'Review and sign off on project hours submitted across sister entities'}
                 </p>
               </div>
-              <span className="rounded-xl bg-cisd-navy-50 text-cisd-navy-900 border border-cisd-navy-200 px-3 py-1 font-bold text-xs">
+              <span className="rounded-xl bg-cisd-navy-50 text-cisd-navy-900 border border-cisd-navy-200 px-3 py-1 font-bold text-xs self-start sm:self-auto">
                 {pendingTimesheets.length} Pending
               </span>
             </div>
 
+            {/* Entity Filter Pills for HR & Executive */}
+            {isExecutiveOrHR && (
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+                <button
+                  onClick={() => setQueueFilterArm('ALL')}
+                  className={`rounded-xl px-3 py-1 font-bold transition whitespace-nowrap ${
+                    queueFilterArm === 'ALL'
+                      ? 'bg-cisd-navy-900 text-white shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  All Entities
+                </button>
+                {(['SWITCH_ADVISORY', 'CISD', 'GX_MEDIA', 'CENTRAL_HOLDING'] as OrganizationArm[]).map(armKey => {
+                  const cfg = getOrganizationArmConfig(armKey);
+                  const isSelected = queueFilterArm === armKey;
+                  return (
+                    <button
+                      key={armKey}
+                      onClick={() => setQueueFilterArm(armKey)}
+                      className={`rounded-xl px-3 py-1 font-bold transition whitespace-nowrap border ${
+                        isSelected
+                          ? `${cfg.badgeClass} ring-2 ring-cisd-navy-900/20 shadow-sm`
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {cfg.shortLabel}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {pendingTimesheets.length === 0 ? (
               <div className="text-center py-12 text-slate-400 space-y-2">
                 <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto" />
-                <p className="text-xs font-bold text-slate-700">No pending timesheets awaiting review</p>
+                <p className="text-xs font-bold text-slate-700">
+                  {queueFilterArm !== 'ALL'
+                    ? `No pending timesheets for ${getOrganizationArmConfig(queueFilterArm).label}`
+                    : 'No pending timesheets awaiting review'}
+                </p>
                 <p className="text-[11px] text-slate-400">All submitted project hours have been adjudicated.</p>
+                {queueFilterArm !== 'ALL' && (
+                  <button
+                    onClick={() => setQueueFilterArm('ALL')}
+                    className="mt-2 text-xs font-bold text-cisd-navy-900 hover:underline"
+                  >
+                    View All Pending
+                  </button>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {pendingTimesheets.map(ts => {
                   const emp = db.employees.find(e => e.id === ts.employeeId);
                   const dept = db.departments.find(d => d.id === emp?.departmentId);
+                  const arm = ts.organizationArm || emp?.organizationArm;
+                  const armCfg = getOrganizationArmConfig(arm);
 
                   return (
                     <div key={ts.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3 hover:border-cisd-gold-400 transition">
@@ -662,7 +731,12 @@ export default function TimesheetsModule() {
                             className="h-9 w-9 rounded-full object-cover border border-slate-200"
                           />
                           <div>
-                            <p className="font-bold text-slate-900 text-xs">{emp?.firstName} {emp?.lastName}</p>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="font-bold text-slate-900 text-xs">{emp?.firstName} {emp?.lastName}</p>
+                              <span className={`inline-flex items-center rounded px-1.5 py-0.2 text-[9px] font-bold border ${armCfg.badgeClass}`}>
+                                {armCfg.shortLabel}
+                              </span>
+                            </div>
                             <p className="text-[10px] text-slate-500">{emp?.designation} &bull; {dept?.name}</p>
                           </div>
                         </div>

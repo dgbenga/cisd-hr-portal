@@ -18,9 +18,11 @@ import {
   Plus,
   X
 } from 'lucide-react';
+import { OrganizationArm, getOrganizationArmConfig } from '@/lib/types';
 
 export default function DepartmentsModule() {
   const { db, currentUser, setSelectedEmployeeIdForModal, setActiveTab, dispatch, showToast } = usePortal();
+  const [filterArm, setFilterArm] = useState<'ALL' | OrganizationArm>('ALL');
   const [selectedDeptId, setSelectedDeptId] = useState<string>(
     currentUser?.departmentId ? currentUser.departmentId : (db?.departments?.[0]?.id || 'dept-cisd')
   );
@@ -31,7 +33,8 @@ export default function DepartmentsModule() {
   const [showAddDeptModal, setShowAddDeptModal] = useState(false);
   const [deptName, setDeptName] = useState('');
   const [deptCode, setDeptCode] = useState('');
-  const [deptHeadId, setDeptHeadId] = useState('emp-phibi');
+  const [deptArm, setDeptArm] = useState<OrganizationArm>('SWITCH_ADVISORY');
+  const [deptHeadId, setDeptHeadId] = useState('emp-2');
   const [deptLocation, setDeptLocation] = useState('Floor 3, Diplomatic Wing, Abuja HQ');
   const [deptDescription, setDeptDescription] = useState('');
 
@@ -53,7 +56,8 @@ export default function DepartmentsModule() {
       code: deptCode.toUpperCase(),
       headId: deptHeadId,
       location: deptLocation,
-      description: deptDescription
+      description: deptDescription,
+      organizationArm: deptArm
     });
     if (res.success) {
       showToast(`Strategic Directorate "${deptName}" created`, 'success');
@@ -64,14 +68,18 @@ export default function DepartmentsModule() {
     }
   };
 
+  const visibleDepartments = filterArm === 'ALL'
+    ? db.departments
+    : db.departments.filter(d => d.organizationArm === filterArm);
+
   return (
     <div className="space-y-6">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-slate-900 tracking-tight">CISD Departments & Governance Structure</h2>
+          <h2 className="text-xl font-black text-slate-900 tracking-tight">Enterprise Directorates & Entities</h2>
           <p className="text-xs text-slate-500">
-            {db.departments.length} Core Strategic Policy & Operational Directorates of the Centre for International Strategic Dialogue
+            {db.departments.length} Core Strategic Units across Switch Advisory, CISD, GX Media House, and Central Services
           </p>
         </div>
 
@@ -86,12 +94,46 @@ export default function DepartmentsModule() {
         )}
       </div>
 
+      {/* Entity Selector Pills Bar */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+        <button
+          onClick={() => setFilterArm('ALL')}
+          className={`rounded-xl px-3.5 py-1.5 font-bold transition whitespace-nowrap shadow-sm ${
+            filterArm === 'ALL'
+              ? 'bg-cisd-navy-900 text-white shadow'
+              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          All Entities ({db.departments.length})
+        </button>
+        {(['SWITCH_ADVISORY', 'CISD', 'GX_MEDIA', 'CENTRAL_HOLDING'] as OrganizationArm[]).map(armKey => {
+          const cfg = getOrganizationArmConfig(armKey);
+          const count = db.departments.filter(d => d.organizationArm === armKey).length;
+          const isSelected = filterArm === armKey;
+          return (
+            <button
+              key={armKey}
+              onClick={() => setFilterArm(armKey)}
+              className={`rounded-xl px-3.5 py-1.5 font-bold transition whitespace-nowrap border ${
+                isSelected
+                  ? `${cfg.badgeClass} ring-2 ring-cisd-navy-900/20 shadow-sm`
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <span className="hidden sm:inline">{cfg.label}</span>
+              <span className="sm:hidden">{cfg.shortLabel}</span> ({count})
+            </button>
+          );
+        })}
+      </div>
+
       {/* Department Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        {db.departments.map(dept => {
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+        {visibleDepartments.map(dept => {
           const isSelected = dept.id === currentDept.id;
           const members = db.employees.filter(e => e.departmentId === dept.id);
           const head = db.employees.find(e => e.id === dept.headId);
+          const armCfg = getOrganizationArmConfig(dept.organizationArm);
 
           return (
             <div
@@ -99,12 +141,12 @@ export default function DepartmentsModule() {
               onClick={() => setSelectedDeptId(dept.id)}
               className={`cursor-pointer rounded-2xl border p-4 transition flex flex-col justify-between ${
                 isSelected
-                  ? 'border-cisd-navy-900 bg-cisd-navy-950 text-white shadow-lg'
+                  ? 'border-cisd-navy-900 bg-cisd-navy-950 text-white shadow-lg ring-2 ring-cisd-gold-500/50'
                   : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
               }`}
             >
               <div>
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between gap-1 mb-2">
                   <span className={`rounded font-mono text-[10px] px-1.5 py-0.5 font-bold ${
                     isSelected ? 'bg-cisd-gold-500 text-cisd-navy-950' : 'bg-slate-100 text-slate-700'
                   }`}>
@@ -114,13 +156,22 @@ export default function DepartmentsModule() {
                     {members.length} Staff
                   </span>
                 </div>
+
+                <div className="mb-2">
+                  <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-bold border ${
+                    isSelected ? 'bg-white/10 text-white border-white/20' : armCfg.badgeClass
+                  }`}>
+                    {armCfg.shortLabel}
+                  </span>
+                </div>
+
                 <h3 className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>
                   {dept.name}
                 </h3>
               </div>
 
               <div className={`mt-3 pt-2.5 border-t text-[11px] ${isSelected ? 'border-slate-800 text-slate-400' : 'border-slate-100 text-slate-500'}`}>
-                Head: <span className={`font-semibold ${isSelected ? 'text-white' : 'text-slate-800'}`}>{head?.firstName} {head?.lastName}</span>
+                Lead: <span className={`font-semibold ${isSelected ? 'text-white' : 'text-slate-800'}`}>{head?.firstName} {head?.lastName}</span>
               </div>
             </div>
           );
@@ -278,6 +329,20 @@ export default function DepartmentsModule() {
                   onChange={(e) => setDeptName(e.target.value)}
                   className="w-full rounded-lg border border-slate-200 p-2 text-xs"
                 />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Organization Arm / Entity</label>
+                <select
+                  value={deptArm}
+                  onChange={(e) => setDeptArm(e.target.value as OrganizationArm)}
+                  className="w-full rounded-lg border border-slate-200 p-2 text-xs font-medium"
+                >
+                  <option value="SWITCH_ADVISORY">Switch Advisory</option>
+                  <option value="CISD">CISD (Inclusive Dialogue)</option>
+                  <option value="GX_MEDIA">GX Media House</option>
+                  <option value="CENTRAL_HOLDING">Central Holding & Governance</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

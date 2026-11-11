@@ -18,7 +18,7 @@ import {
   Check,
   X
 } from 'lucide-react';
-import { LeaveType, LeaveStatus, LeaveRequest } from '@/lib/types';
+import { LeaveType, LeaveStatus, LeaveRequest, OrganizationArm, getOrganizationArmConfig } from '@/lib/types';
 
 export default function LeaveModule() {
   const { db, currentUser, dispatch, showToast } = usePortal();
@@ -26,6 +26,7 @@ export default function LeaveModule() {
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [filterType, setFilterType] = useState<string>('ALL');
   const [search, setSearch] = useState('');
+  const [leaveQueueFilterArm, setLeaveQueueFilterArm] = useState<'ALL' | OrganizationArm>('ALL');
 
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [selectedLeaveForDetail, setSelectedLeaveForDetail] = useState<LeaveRequest | null>(null);
@@ -57,14 +58,23 @@ export default function LeaveModule() {
   };
 
   const role = currentUser.role || 'SUPER_ADMIN';
-  const teamMemberIds = db.employees.filter(e => e.departmentId === currentUser.departmentId).map(e => e.id);
+  const isExecutiveOrHR = role === 'SUPER_ADMIN' || role === 'EXECUTIVE' || role === 'HR_ADMIN';
+  const isLineManager = role === 'LINE_MANAGER';
+
+  const teamMemberIds = isExecutiveOrHR
+    ? db.employees.map(e => e.id)
+    : db.employees.filter(e =>
+        (e.organizationArm && currentUser.organizationArm && e.organizationArm === currentUser.organizationArm) ||
+        e.departmentId === currentUser.departmentId ||
+        e.reportingManagerId === currentUser.id
+      ).map(e => e.id);
 
   // Filter requests based on role
   const filteredLeaves = db.leaveRequests.filter(l => {
     // If EMPLOYEE: only show personal leave history
     if (role === 'EMPLOYEE' && l.employeeId !== currentUser.id) return false;
-    // If LINE_MANAGER: show department staff + own
-    if (role === 'LINE_MANAGER' && !teamMemberIds.includes(l.employeeId) && l.employeeId !== currentUser.id) return false;
+    // If LINE_MANAGER: show entity/department staff + own
+    if (isLineManager && !teamMemberIds.includes(l.employeeId) && l.employeeId !== currentUser.id) return false;
 
     const emp = db.employees.find(e => e.id === l.employeeId);
     if (!emp) return false;
@@ -77,12 +87,27 @@ export default function LeaveModule() {
     return matchStatus && matchType && matchSearch;
   });
 
-  // Approvals queue tailored strictly by role
+  // Approvals queue tailored strictly by role with anti-self-approval and arm scoping
   const pendingLeaves = role === 'EMPLOYEE'
     ? []
-    : role === 'LINE_MANAGER'
-    ? db.leaveRequests.filter(l => l.status === 'PENDING' && teamMemberIds.includes(l.employeeId) && l.employeeId !== currentUser.id)
-    : db.leaveRequests.filter(l => l.status === 'PENDING');
+    : isLineManager
+    ? db.leaveRequests.filter(l => {
+        if (l.status !== 'PENDING') return false;
+        if (l.employeeId === currentUser.id) return false;
+        const submitter = db.employees.find(e => e.id === l.employeeId);
+        const sameArm = submitter?.organizationArm && currentUser.organizationArm && submitter.organizationArm === currentUser.organizationArm;
+        const isReport = submitter?.reportingManagerId === currentUser.id;
+        const sameDept = submitter?.departmentId === currentUser.departmentId;
+        return sameArm || isReport || sameDept;
+      })
+    : db.leaveRequests.filter(l => {
+        if (l.status !== 'PENDING') return false;
+        if (l.employeeId === currentUser.id) return false;
+        if (leaveQueueFilterArm === 'ALL') return true;
+        const submitter = db.employees.find(e => e.id === l.employeeId);
+        const recordArm = l.organizationArm || submitter?.organizationArm;
+        return recordArm === leaveQueueFilterArm;
+      });
 
   const handleApplyLeave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -256,23 +281,61 @@ export default function LeaveModule() {
       </div>
 
       {/* Pending Approvals Section for Managers and HR */}
-      {(role === 'SUPER_ADMIN' || role === 'HR_ADMIN' || role === 'LINE_MANAGER') && pendingLeaves.length > 0 && (
+      {(isExecutiveOrHR || isLineManager) && pendingLeaves.length > 0 && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50/40 p-5 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-amber-600" />
               <h3 className="font-bold text-slate-900 text-sm">
-                {role === 'LINE_MANAGER' ? 'Directorate Action Required: Team Leave Approvals' : 'Awaiting Executive & Managerial Sign-Off'} ({pendingLeaves.length})
+                {isLineManager
+                  ? `Directorate Action Required: ${getOrganizationArmConfig(currentUser.organizationArm).label} Leaves`
+                  : 'Awaiting Executive & Managerial Sign-Off'} ({pendingLeaves.length})
               </h3>
             </div>
-            <span className="text-xs font-semibold text-amber-800">Action Required</span>
+            <span className="text-xs font-semibold text-amber-800 self-start sm:self-auto">Action Required</span>
           </div>
+
+          {/* Entity Filter Pills for HR & Executive */}
+          {isExecutiveOrHR && (
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+              <button
+                onClick={() => setLeaveQueueFilterArm('ALL')}
+                className={`rounded-xl px-3 py-1 font-bold transition whitespace-nowrap ${
+                  leaveQueueFilterArm === 'ALL'
+                    ? 'bg-amber-900 text-white shadow-sm'
+                    : 'bg-white border border-amber-200 text-slate-700 hover:bg-amber-100/50'
+                }`}
+              >
+                All Entities
+              </button>
+              {(['SWITCH_ADVISORY', 'CISD', 'GX_MEDIA', 'CENTRAL_HOLDING'] as OrganizationArm[]).map(armKey => {
+                const cfg = getOrganizationArmConfig(armKey);
+                const isSelected = leaveQueueFilterArm === armKey;
+                return (
+                  <button
+                    key={armKey}
+                    onClick={() => setLeaveQueueFilterArm(armKey)}
+                    className={`rounded-xl px-3 py-1 font-bold transition whitespace-nowrap border ${
+                      isSelected
+                        ? `${cfg.badgeClass} ring-2 ring-amber-900/20 shadow-sm`
+                        : 'bg-white border-amber-200 text-slate-700 hover:bg-amber-100/50'
+                    }`}
+                  >
+                    {cfg.shortLabel}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {pendingLeaves.map(leave => {
               const emp = db.employees.find(e => e.id === leave.employeeId);
               const dept = db.departments.find(d => d.id === emp?.departmentId);
               const handover = db.employees.find(e => e.id === leave.handoverEmployeeId);
+              const arm = leave.organizationArm || emp?.organizationArm;
+              const armCfg = getOrganizationArmConfig(arm);
+
               return (
                 <div key={leave.id} className="rounded-xl border border-amber-200 bg-white p-4 shadow-sm space-y-2.5">
                   <div className="flex items-start justify-between">
@@ -283,7 +346,12 @@ export default function LeaveModule() {
                         className="h-10 w-10 rounded-full object-cover border border-slate-200"
                       />
                       <div>
-                        <h4 className="font-bold text-slate-900 text-xs">{emp?.firstName} {emp?.lastName}</h4>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h4 className="font-bold text-slate-900 text-xs">{emp?.firstName} {emp?.lastName}</h4>
+                          <span className={`inline-flex items-center rounded px-1.5 py-0.2 text-[9px] font-bold border ${armCfg.badgeClass}`}>
+                            {armCfg.shortLabel}
+                          </span>
+                        </div>
                         <p className="text-[11px] text-slate-500">{dept?.name}</p>
                       </div>
                     </div>
@@ -407,7 +475,18 @@ export default function LeaveModule() {
                           className="h-7 w-7 rounded-full object-cover border"
                         />
                         <div>
-                          <p className="font-bold text-slate-900">{emp?.firstName} {emp?.lastName}</p>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="font-bold text-slate-900">{emp?.firstName} {emp?.lastName}</p>
+                            {(() => {
+                              const arm = leave.organizationArm || emp?.organizationArm;
+                              const armCfg = getOrganizationArmConfig(arm);
+                              return (
+                                <span className={`inline-flex items-center rounded px-1.5 py-0.2 text-[9px] font-bold border ${armCfg.badgeClass}`}>
+                                  {armCfg.shortLabel}
+                                </span>
+                              );
+                            })()}
+                          </div>
                           <p className="text-[10px] text-slate-400">{emp?.employeeId}</p>
                         </div>
                       </div>

@@ -2,6 +2,62 @@ export type UserRole = 'SUPER_ADMIN' | 'EXECUTIVE' | 'HR_ADMIN' | 'FINANCE' | 'L
 export type OrganizationArm = 'CISD' | 'SWITCH_ADVISORY' | 'GX_MEDIA' | 'CENTRAL_HOLDING';
 export type AccessLevel = 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 'L7';
 
+export interface OrganizationArmMetadata {
+  arm: OrganizationArm;
+  label: string;
+  shortLabel: string;
+  badgeClass: string;
+  borderClass: string;
+  textClass: string;
+  accentBg: string; // WCAG 2.1 AA compliant (>= 4.5:1 against white)
+}
+
+export const ORGANIZATION_ARM_CONFIG: Record<OrganizationArm, OrganizationArmMetadata> = {
+  SWITCH_ADVISORY: {
+    arm: 'SWITCH_ADVISORY',
+    label: 'Switch Advisory',
+    shortLabel: 'Switch',
+    badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    borderClass: 'border-emerald-300',
+    textClass: 'text-emerald-700',
+    accentBg: 'bg-emerald-700'
+  },
+  CISD: {
+    arm: 'CISD',
+    label: 'CISD (Inclusive Dialogue)',
+    shortLabel: 'CISD',
+    badgeClass: 'bg-sky-50 text-sky-800 border-sky-200',
+    borderClass: 'border-sky-300',
+    textClass: 'text-sky-700',
+    accentBg: 'bg-sky-700'
+  },
+  GX_MEDIA: {
+    arm: 'GX_MEDIA',
+    label: 'GX Media House',
+    shortLabel: 'GX Media',
+    badgeClass: 'bg-purple-50 text-purple-800 border-purple-200',
+    borderClass: 'border-purple-300',
+    textClass: 'text-purple-700',
+    accentBg: 'bg-purple-700'
+  },
+  CENTRAL_HOLDING: {
+    arm: 'CENTRAL_HOLDING',
+    label: 'Central Holding & Governance',
+    shortLabel: 'Central',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+    borderClass: 'border-slate-300',
+    textClass: 'text-slate-700',
+    accentBg: 'bg-slate-700'
+  }
+};
+
+export function getOrganizationArmConfig(arm?: OrganizationArm): OrganizationArmMetadata {
+  if (!arm || !ORGANIZATION_ARM_CONFIG[arm]) {
+    return ORGANIZATION_ARM_CONFIG.CENTRAL_HOLDING;
+  }
+  return ORGANIZATION_ARM_CONFIG[arm];
+}
+
 export type EmploymentStatus = 'ACTIVE' | 'ON_PROBATION' | 'ON_LEAVE' | 'TERMINATED';
 export type EmploymentType = 'FULL_TIME' | 'CONTRACT' | 'FELLOW' | 'INTERN';
 
@@ -118,6 +174,7 @@ export type LeaveStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export interface LeaveRequest {
   id: string;
   employeeId: string;
+  organizationArm?: OrganizationArm;
   leaveType: LeaveType;
   startDate: string;
   endDate: string;
@@ -376,6 +433,7 @@ export interface TimesheetEntry {
 export interface Timesheet {
   id: string;
   employeeId: string;
+  organizationArm?: OrganizationArm;
   weekStartDate: string;
   weekEndDate: string;
   status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
