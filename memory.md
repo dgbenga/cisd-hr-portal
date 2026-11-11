@@ -36,8 +36,10 @@
 
 ---
 
-## Session Checkpoint: Phase 2 Completed & Verified (2026-11-11T16:12:00+01:00)
-- **Status**: Implemented & Production Build Verified Green
+## Session Checkpoint: Phase 2 Completed & Pushed to GitHub (2026-11-11T16:15:00+01:00)
+- **Commit**: `1ce7ecd` (*feat: implement Phase 2 multi-entity scoping, semantic badging, and BOLA-hardened approvals*)
+- **Remote**: `origin/main` (https://github.com/dgbenga/cisd-hr-portal.git)
+- **Status**: Landed & Pushed
 - **Spec**: `docs/specs/0002-multi-entity-scoping-phase2/index.md` (Status: Accepted)
 - **Scope**: Multi-entity badges & filters across Staff Directory, 360° Dossier, and Departments, plus Line Manager approval scoping in Timesheets and Leave with server-side BOLA protection.
 
