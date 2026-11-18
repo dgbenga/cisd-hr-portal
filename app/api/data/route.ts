@@ -35,16 +35,51 @@ import {
   Timesheet,
   TimesheetEntry,
   HybridSchedule,
-  UserRole
+  UserRole,
+  PayrollRecord,
+  OrganizationArm,
+  Announcement,
+  roundNaira
 } from '@/lib/types';
 
 /**
  * GET Handler - Retrieves the entire database snapshot for the client-side portal state.
+ * Implements privacy partitioning: sensitive payroll records are scoped to caller's identity
+ * unless caller possesses elevated clearance (FINANCE, HR_ADMIN, SUPER_ADMIN, EXECUTIVE).
  */
 export async function GET(req: NextRequest) {
   try {
     const db = readDb();
-    return NextResponse.json({ success: true, data: db });
+    const { searchParams } = new URL(req.url);
+    const userId = req.headers.get('x-user-id') || searchParams.get('userId');
+
+    let caller: Employee | undefined;
+    if (userId) {
+      caller = db.employees.find(e => e.id === userId);
+    }
+
+    // Role-based partitioning for payroll records:
+    // Only FINANCE, HR_ADMIN, SUPER_ADMIN, and EXECUTIVE can view all payroll records across the tripartite entities.
+    // Standard employees and line managers can only see their own payslips (employeeId === caller.id).
+    const privilegedRoles: UserRole[] = ['FINANCE', 'HR_ADMIN', 'SUPER_ADMIN', 'EXECUTIVE'];
+    let filteredPayroll = db.payrollRecords || [];
+
+    if (!caller || !privilegedRoles.includes(caller.role)) {
+      if (caller) {
+        filteredPayroll = filteredPayroll.filter(p => p.employeeId === caller!.id);
+      } else {
+        // If unauthenticated or caller is not found, return empty payroll array to prevent data leaks
+        filteredPayroll = [];
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...db,
+        payrollRecords: filteredPayroll
+      }
+    });
   } catch (error: any) {
     console.error('[CISD API /api/data GET Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -60,10 +95,10 @@ export async function POST(req: NextRequest) {
     const { action, payload, user } = body;
     const db = readDb();
 
-    // Caller identity context
-    const currentUserId: string = user?.id || 'emp-1';
-    const currentUserName: string = user?.name || 'Dr. Amina Bello';
-    const currentUserRole: UserRole = user?.role || 'SUPER_ADMIN';
+    // Caller identity context - strictly default to unprivileged EMPLOYEE if user is omitted
+    const currentUserId: string = user?.id || '';
+    const currentUserName: string = user?.name || 'Unauthenticated User';
+    const currentUserRole: UserRole = user?.role || 'EMPLOYEE';
 
     // Helper: Role-Based Authorization Guard
     const requireRoles = (allowedRoles: UserRole[], actionDescription: string) => {
@@ -272,11 +307,11 @@ export async function POST(req: NextRequest) {
         const emp = db.employees.find(e => e.id === empId);
         if (!emp) return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
 
-        // Security check: HR_ADMIN cannot delete a SUPER_ADMIN account
-        if (currentUserRole === 'HR_ADMIN' && emp.role === 'SUPER_ADMIN') {
+        // Security check: HR_ADMIN cannot delete a SUPER_ADMIN or EXECUTIVE account
+        if (currentUserRole === 'HR_ADMIN' && (emp.role === 'SUPER_ADMIN' || emp.role === 'EXECUTIVE')) {
           return NextResponse.json({
             success: false,
-            error: 'Access Denied: HR Administrator cannot delete the Super Administrator account.'
+            error: 'Access Denied: HR Administrator cannot delete Executive or Super Administrator accounts.'
           }, { status: 403 });
         }
 
@@ -712,10 +747,31 @@ export async function POST(req: NextRequest) {
       // 5. TASK MANAGEMENT MODULE
       // ========================================================================
       case 'CREATE_TASK': {
+        const caller = db.employees.find(e => e.id === currentUserId);
+        const assignedEmp = db.employees.find(e => e.id === payload.assignedToId);
+
+        // BOLA Validation for Line Managers:
+        // A line manager can only assign tasks to employees within their own entity,
+        // UNLESS it is an authorized Cross-Arm Request to GX Media House (isCrossArm === true).
+        if (currentUserRole === 'LINE_MANAGER' && caller && assignedEmp) {
+          if (assignedEmp.organizationArm !== caller.organizationArm) {
+            const isGxCollaboration = payload.isCrossArm && (payload.collaborationArm === 'GX_MEDIA' || assignedEmp.organizationArm === 'GX_MEDIA');
+            if (!isGxCollaboration) {
+              return NextResponse.json({
+                success: false,
+                error: `BOLA Access Denied: Line managers may only assign tasks within their entity (${caller.organizationArm}). Use Cross-Arm Delegation to request creative assets from GX Media House.`
+              }, { status: 403 });
+            }
+          }
+        }
+
         const newTask: Task = {
           ...payload,
           id: `task-${Date.now()}`,
           createdById: currentUserId,
+          organizationArm: payload.organizationArm || caller?.organizationArm || 'CENTRAL_HOLDING',
+          collaborationArm: payload.collaborationArm,
+          isCrossArm: Boolean(payload.isCrossArm),
           progressPercentage: Number(payload.progressPercentage || 0)
         };
         db.tasks.unshift(newTask);
@@ -724,7 +780,7 @@ export async function POST(req: NextRequest) {
           db,
           'CREATE_TASK',
           'Tasks',
-          `Created assignment "${newTask.title}" assigned to ${newTask.assignedToId}`,
+          `Created assignment "${newTask.title}" assigned to ${assignedEmp ? `${assignedEmp.firstName} ${assignedEmp.lastName}` : newTask.assignedToId}${newTask.isCrossArm ? ' [Cross-Arm Delegation]' : ''}`,
           currentUserId,
           currentUserName
         );
@@ -1334,12 +1390,25 @@ export async function POST(req: NextRequest) {
       // 13. ANNOUNCEMENTS & DIPLOMATIC NOTICES
       // ========================================================================
       case 'CREATE_ANNOUNCEMENT': {
-        requireRoles(['SUPER_ADMIN', 'HR_ADMIN'], 'Broadcasting announcements');
-        const newAnn = {
+        requireRoles(['SUPER_ADMIN', 'HR_ADMIN', 'EXECUTIVE', 'LINE_MANAGER'], 'Broadcasting announcements');
+        const caller = db.employees.find(e => e.id === currentUserId);
+        const targetArm: OrganizationArm | 'ALL' = payload.targetArm || 'ALL';
+
+        if (currentUserRole === 'LINE_MANAGER') {
+          if (targetArm !== caller?.organizationArm) {
+            return NextResponse.json({
+              success: false,
+              error: `Access Denied: Line managers may only broadcast notices targeted to their own arm (${caller?.organizationArm}).`
+            }, { status: 403 });
+          }
+        }
+
+        const newAnn: Announcement = {
           ...payload,
           id: `ann-${Date.now()}`,
           publishDate: new Date().toISOString().split('T')[0],
           authorId: currentUserId,
+          targetArm: targetArm,
           acknowledgeCount: 1
         };
         db.announcements.unshift(newAnn);
@@ -1348,7 +1417,7 @@ export async function POST(req: NextRequest) {
           db,
           'CREATE_ANNOUNCEMENT',
           'Announcements',
-          `Broadcasted institutional communique: "${newAnn.title}" (${newAnn.priority})`,
+          `Broadcasted institutional communique: "${newAnn.title}" (${newAnn.priority}) for arm: ${newAnn.targetArm}`,
           currentUserId,
           currentUserName
         );
@@ -1642,6 +1711,284 @@ export async function POST(req: NextRequest) {
         );
         writeDb(db);
         return NextResponse.json({ success: true, data: db.settings });
+      }
+
+      // ========================================================================
+      // 17. GROUP PAYROLL OPERATIONS & 4-EYES GOVERNANCE
+      // ========================================================================
+      case 'GENERATE_PAYROLL': {
+        requireRoles(['FINANCE', 'SUPER_ADMIN'], 'Generating group payroll drafts');
+        if (!db.payrollRecords) db.payrollRecords = [];
+
+        const targetMonth = payload.month || '2026-11';
+        let targetEmployees = db.employees.filter(e => e.status === 'ACTIVE');
+        if (payload.entity && payload.entity !== 'ALL') {
+          targetEmployees = targetEmployees.filter(e => e.organizationArm === payload.entity);
+        }
+
+        // Immutability check: cannot regenerate if records are already DISBURSED
+        const hasDisbursed = db.payrollRecords.some(p =>
+          p.month === targetMonth &&
+          p.status === 'DISBURSED' &&
+          targetEmployees.some(e => e.id === p.employeeId)
+        );
+        if (hasDisbursed) {
+          return NextResponse.json({
+            success: false,
+            error: `Conflict: Payroll for ${targetMonth} has already been disbursed. Disbursed records are immutable.`
+          }, { status: 409 });
+        }
+
+        let generatedCount = 0;
+        for (const emp of targetEmployees) {
+          let base = emp.salary || 350000;
+          if (!emp.salary) {
+            if (emp.accessLevel === 'L7') base = 3200000;
+            else if (emp.accessLevel === 'L4') base = 1100000;
+            else if (emp.accessLevel === 'L3') base = 850000;
+            else if (emp.accessLevel === 'L2') base = 550000;
+            else base = 350000;
+          }
+          const basic = roundNaira(base * 0.45);
+          const housing = roundNaira(base * 0.25);
+          const transport = roundNaira(base * 0.15);
+          const utility = roundNaira(base * 0.15);
+          const grossSalary = roundNaira(basic + housing + transport + utility);
+          const employeePension = roundNaira(grossSalary * 0.08);
+          const employerPension = roundNaira(grossSalary * 0.10);
+          const taxablePay = Math.max(0, grossSalary - employeePension);
+
+          let tax = 0;
+          if (taxablePay > 266666) {
+            tax = roundNaira(taxablePay * 0.19);
+          } else if (taxablePay > 133333) {
+            tax = roundNaira(taxablePay * 0.15);
+          } else {
+            tax = roundNaira(taxablePay * 0.07);
+          }
+          const payeTax = tax;
+          const totalDeductions = roundNaira(payeTax + employeePension);
+          const netSalary = roundNaira(grossSalary - totalDeductions);
+
+          const existingIndex = db.payrollRecords.findIndex(p => p.employeeId === emp.id && p.month === targetMonth);
+          const newRecord: PayrollRecord = {
+            id: existingIndex !== -1 ? db.payrollRecords[existingIndex].id : `pay-${emp.id}-${targetMonth}`,
+            employeeId: emp.id,
+            month: targetMonth,
+            organizationArm: emp.organizationArm || 'CENTRAL_HOLDING',
+            basicSalary: basic,
+            housingAllowance: housing,
+            transportAllowance: transport,
+            utilityAllowance: utility,
+            otherAllowances: 0,
+            grossPay: grossSalary,
+            grossSalary,
+            taxPAYE: payeTax,
+            payeTax,
+            pension: employeePension,
+            pensionEmployee: employeePension,
+            pensionEmployer: employerPension,
+            otherDeductions: 0,
+            totalDeductions,
+            netPay: netSalary,
+            netSalary,
+            status: 'DRAFT',
+            currency: 'NGN',
+            paymentMethod: 'DIRECT_DEPOSIT',
+            bankName: emp.personalInfo?.bankDetails?.bankName || 'Guaranty Trust Bank (GTBank)',
+            accountNumber: emp.personalInfo?.bankDetails?.accountNumber || `012${Math.floor(1000000 + Math.random() * 9000000)}`,
+            createdAt: new Date().toISOString(),
+            createdBy: currentUserId,
+            generatedBy: currentUserId
+          };
+
+          if (existingIndex !== -1) {
+            db.payrollRecords[existingIndex] = newRecord;
+          } else {
+            db.payrollRecords.push(newRecord);
+          }
+          generatedCount++;
+        }
+
+        recordAuditLog(
+          db,
+          'GENERATE_PAYROLL',
+          'Payroll',
+          `Generated draft payroll for ${generatedCount} staff members for ${targetMonth}`,
+          currentUserId,
+          currentUserName
+        );
+        writeDb(db);
+        return NextResponse.json({ success: true, count: generatedCount, month: targetMonth });
+      }
+
+      case 'AUDIT_PAYROLL': {
+        requireRoles(['HR_ADMIN', 'SUPER_ADMIN'], 'Auditing payroll records');
+        if (!db.payrollRecords) db.payrollRecords = [];
+
+        const targetMonth = payload.month || '2026-11';
+        let records = db.payrollRecords.filter(p => p.month === targetMonth);
+        if (payload.entity && payload.entity !== 'ALL') {
+          const empIds = new Set(db.employees.filter(e => e.organizationArm === payload.entity).map(e => e.id));
+          records = records.filter(p => empIds.has(p.employeeId));
+        }
+
+        const draftRecords = records.filter(p => p.status === 'DRAFT');
+        if (draftRecords.length === 0) {
+          return NextResponse.json({
+            success: false,
+            error: 'No draft payroll records found awaiting audit for this period.'
+          }, { status: 400 });
+        }
+
+        // Separation of duties: caller cannot audit payroll they drafted (unless SUPER_ADMIN)
+        if (currentUserRole !== 'SUPER_ADMIN') {
+          const isSelfDrafter = draftRecords.some(r => r.createdBy === currentUserId || r.generatedBy === currentUserId);
+          if (isSelfDrafter) {
+            return NextResponse.json({
+              success: false,
+              error: 'Separation of Duties Violation: You cannot audit payroll records you drafted. An independent HR Lead or Auditor must review.'
+            }, { status: 403 });
+          }
+        }
+
+        const auditTime = new Date().toISOString();
+        for (const record of draftRecords) {
+          record.status = 'AUDITED';
+          record.auditedBy = currentUserId;
+          record.auditedAt = auditTime;
+        }
+
+        recordAuditLog(
+          db,
+          'AUDIT_PAYROLL',
+          'Payroll',
+          `Audited ${draftRecords.length} payroll records for ${targetMonth}`,
+          currentUserId,
+          currentUserName
+        );
+        writeDb(db);
+        return NextResponse.json({ success: true, count: draftRecords.length });
+      }
+
+      case 'APPROVE_PAYROLL': {
+        requireRoles(['EXECUTIVE', 'SUPER_ADMIN'], 'Approving executive payroll disbursement');
+        if (!db.payrollRecords) db.payrollRecords = [];
+
+        const targetMonth = payload.month || '2026-11';
+        let records = db.payrollRecords.filter(p => p.month === targetMonth);
+        if (payload.entity && payload.entity !== 'ALL') {
+          const empIds = new Set(db.employees.filter(e => e.organizationArm === payload.entity).map(e => e.id));
+          records = records.filter(p => empIds.has(p.employeeId));
+        }
+
+        const auditedRecords = records.filter(p => p.status === 'AUDITED');
+        if (auditedRecords.length === 0) {
+          return NextResponse.json({
+            success: false,
+            error: 'Governance Prerequisite Unmet: Payroll must be audited by HR Lead before Executive approval.'
+          }, { status: 400 });
+        }
+
+        // Separation of duties
+        if (currentUserRole !== 'SUPER_ADMIN') {
+          const isSelfDrafter = auditedRecords.some(r => r.createdBy === currentUserId || r.generatedBy === currentUserId);
+          if (isSelfDrafter) {
+            return NextResponse.json({
+              success: false,
+              error: 'Separation of Duties Violation: Payroll drafter cannot approve payroll.'
+            }, { status: 403 });
+          }
+        }
+
+        const approvalTime = new Date().toISOString();
+        for (const record of auditedRecords) {
+          record.status = 'APPROVED';
+          record.approvedBy = currentUserId;
+          record.approvedAt = approvalTime;
+        }
+
+        recordAuditLog(
+          db,
+          'APPROVE_PAYROLL',
+          'Payroll',
+          `Approved ${auditedRecords.length} payroll records for ${targetMonth}`,
+          currentUserId,
+          currentUserName
+        );
+        writeDb(db);
+        return NextResponse.json({ success: true, count: auditedRecords.length });
+      }
+
+      case 'DISBURSE_PAYROLL': {
+        requireRoles(['FINANCE', 'SUPER_ADMIN'], 'Executing bank salary disbursement');
+        if (!db.payrollRecords) db.payrollRecords = [];
+
+        const targetMonth = payload.month || '2026-11';
+        let records = db.payrollRecords.filter(p => p.month === targetMonth);
+        if (payload.entity && payload.entity !== 'ALL') {
+          const empIds = new Set(db.employees.filter(e => e.organizationArm === payload.entity).map(e => e.id));
+          records = records.filter(p => empIds.has(p.employeeId));
+        }
+
+        const approvedRecords = records.filter(p => p.status === 'APPROVED');
+        if (approvedRecords.length === 0) {
+          return NextResponse.json({
+            success: false,
+            error: 'Governance Prerequisite Unmet: Only Executive-approved payroll records can be disbursed.'
+          }, { status: 400 });
+        }
+
+        const disburseTime = new Date().toISOString();
+        for (const record of approvedRecords) {
+          record.status = 'DISBURSED';
+          record.disbursedBy = currentUserId;
+          record.disbursedAt = disburseTime;
+        }
+
+        recordAuditLog(
+          db,
+          'DISBURSE_PAYROLL',
+          'Payroll',
+          `Disbursed salaries for ${approvedRecords.length} staff members for ${targetMonth}`,
+          currentUserId,
+          currentUserName
+        );
+        writeDb(db);
+        return NextResponse.json({ success: true, count: approvedRecords.length });
+      }
+
+      case 'UPDATE_PAYROLL_RECORD': {
+        requireRoles(['FINANCE', 'SUPER_ADMIN'], 'Adjusting payroll record');
+        if (!db.payrollRecords) db.payrollRecords = [];
+
+        const recordIndex = db.payrollRecords.findIndex(p => p.id === payload.id);
+        if (recordIndex === -1) {
+          return NextResponse.json({ success: false, error: 'Payroll record not found' }, { status: 404 });
+        }
+
+        if (db.payrollRecords[recordIndex].status === 'DISBURSED') {
+          return NextResponse.json({
+            success: false,
+            error: 'Immutability Violation: Disbursed payroll records cannot be modified.'
+          }, { status: 409 });
+        }
+
+        db.payrollRecords[recordIndex] = {
+          ...db.payrollRecords[recordIndex],
+          ...payload
+        };
+
+        recordAuditLog(
+          db,
+          'UPDATE_PAYROLL_RECORD',
+          'Payroll',
+          `Updated payroll line item for employee ${db.payrollRecords[recordIndex].employeeId}`,
+          currentUserId,
+          currentUserName
+        );
+        writeDb(db);
+        return NextResponse.json({ success: true, data: db.payrollRecords[recordIndex] });
       }
 
       // ========================================================================

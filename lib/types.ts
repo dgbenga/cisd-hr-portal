@@ -5,8 +5,11 @@ export type AccessLevel = 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 'L7';
 export interface OrganizationArmMetadata {
   arm: OrganizationArm;
   label: string;
+  displayName: string;
   shortLabel: string;
   badgeClass: string;
+  badgeBg: string;
+  badgeText: string;
   borderClass: string;
   textClass: string;
   accentBg: string; // WCAG 2.1 AA compliant (>= 4.5:1 against white)
@@ -16,8 +19,11 @@ export const ORGANIZATION_ARM_CONFIG: Record<OrganizationArm, OrganizationArmMet
   SWITCH_ADVISORY: {
     arm: 'SWITCH_ADVISORY',
     label: 'Switch Advisory',
+    displayName: 'Switch Advisory',
     shortLabel: 'Switch',
     badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    badgeBg: 'bg-emerald-50',
+    badgeText: 'text-emerald-800',
     borderClass: 'border-emerald-300',
     textClass: 'text-emerald-700',
     accentBg: 'bg-emerald-700'
@@ -25,8 +31,11 @@ export const ORGANIZATION_ARM_CONFIG: Record<OrganizationArm, OrganizationArmMet
   CISD: {
     arm: 'CISD',
     label: 'CISD (Inclusive Social Development)',
+    displayName: 'CISD (Inclusive Social Development)',
     shortLabel: 'CISD',
     badgeClass: 'bg-sky-50 text-sky-800 border-sky-200',
+    badgeBg: 'bg-sky-50',
+    badgeText: 'text-sky-800',
     borderClass: 'border-sky-300',
     textClass: 'text-sky-700',
     accentBg: 'bg-sky-700'
@@ -34,8 +43,11 @@ export const ORGANIZATION_ARM_CONFIG: Record<OrganizationArm, OrganizationArmMet
   GX_MEDIA: {
     arm: 'GX_MEDIA',
     label: 'GX Media House',
+    displayName: 'GX Media House',
     shortLabel: 'GX Media',
     badgeClass: 'bg-purple-50 text-purple-800 border-purple-200',
+    badgeBg: 'bg-purple-50',
+    badgeText: 'text-purple-800',
     borderClass: 'border-purple-300',
     textClass: 'text-purple-700',
     accentBg: 'bg-purple-700'
@@ -43,8 +55,11 @@ export const ORGANIZATION_ARM_CONFIG: Record<OrganizationArm, OrganizationArmMet
   CENTRAL_HOLDING: {
     arm: 'CENTRAL_HOLDING',
     label: 'Central Holding & Governance',
+    displayName: 'Central Holding & Governance',
     shortLabel: 'Central',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+    badgeBg: 'bg-slate-100',
+    badgeText: 'text-slate-800',
     borderClass: 'border-slate-300',
     textClass: 'text-slate-700',
     accentBg: 'bg-slate-700'
@@ -97,6 +112,11 @@ export interface PersonalInfo {
   address: string;
   bloodGroup: string;
   ninOrPassport: string;
+  bankDetails?: {
+    bankName: string;
+    accountNumber: string;
+    sortCode?: string;
+  };
 }
 
 export interface Employee {
@@ -123,6 +143,7 @@ export interface Employee {
   emergencyContacts: EmergencyContact[];
   dependants: Dependant[];
   salaryGrade?: string;
+  salary?: number;
   password?: string; // Custom initial staff password
   organizationArm?: OrganizationArm;
   accessLevel?: AccessLevel;
@@ -492,24 +513,38 @@ export interface PayrollRecord {
   id: string;
   employeeId: string;
   month: string; // e.g. "2026-11"
-  organizationArm: OrganizationArm;
+  organizationArm?: OrganizationArm;
   currency: 'NGN';
   basicSalary: number;      // 45% of Gross
   housingAllowance: number; // 25% of Gross
   transportAllowance: number; // 15% of Gross
   utilityAllowance: number;   // 15% of Gross
-  grossPay: number;
-  taxPAYE: number;          // Statutory PAYE deduction
-  pension: number;          // Statutory 8% employee contribution
-  otherDeductions: number;
-  netPay: number;           // roundNaira(grossPay - taxPAYE - pension - otherDeductions)
+  otherAllowances?: number;
+  grossPay?: number;
+  grossSalary?: number;
+  taxPAYE?: number;          // Statutory PAYE deduction
+  payeTax?: number;
+  pension?: number;          // Statutory 8% employee contribution
+  pensionEmployee?: number;
+  pensionEmployer?: number;
+  otherDeductions?: number;
+  totalDeductions?: number;
+  netPay?: number;           // roundNaira(grossPay - taxPAYE - pension - otherDeductions)
+  netSalary?: number;
   status: PayrollStatus;
-  generatedBy: string;      // Victory Kinosi (emp-4)
+  generatedBy?: string;      // Victory Kinosi (emp-4)
+  createdBy?: string;
+  createdAt?: string;
   auditedBy?: string;       // Yaradua Phibi (emp-2)
+  auditedAt?: string;
   approvedBy?: string;      // Folahan Johnson (emp-1)
+  approvedAt?: string;
   disbursedBy?: string;     // Victory Kinosi (emp-4)
   disbursedAt?: string;     // ISO Timestamp
   auditHash?: string;       // SHA-256 tamper seal
+  bankName?: string;
+  accountNumber?: string;
+  paymentMethod?: string;
   notes?: string;
 }
 

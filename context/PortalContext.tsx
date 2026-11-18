@@ -63,23 +63,30 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  const refreshData = async () => {
+  const refreshData = async (overrideUserId?: string) => {
     try {
-      const res = await fetch('/api/data', { cache: 'no-store' });
+      const storedUserId = typeof window !== 'undefined' ? localStorage.getItem('cisd_session_user_id') : null;
+      const effectiveUserId = overrideUserId || currentUser?.id || storedUserId;
+      const headers: Record<string, string> = {};
+      if (effectiveUserId) {
+        headers['x-user-id'] = effectiveUserId;
+      }
+
+      const res = await fetch('/api/data', { cache: 'no-store', headers });
       const json = await res.json();
       if (json.success && json.data) {
         setDb(json.data);
 
         // Check if there's a stored session in localStorage
-        const storedUserId = typeof window !== 'undefined' ? localStorage.getItem('cisd_session_user_id') : null;
+        const activeUserId = overrideUserId || storedUserId;
         const storedAdminUnlocked = typeof window !== 'undefined' ? localStorage.getItem('cisd_admin_unlocked') === 'true' : false;
 
         if (storedAdminUnlocked) {
           setIsAdminUnlocked(true);
         }
 
-        if (storedUserId) {
-          const matched = json.data.employees?.find((e: Employee) => e.id === storedUserId);
+        if (activeUserId) {
+          const matched = json.data.employees?.find((e: Employee) => e.id === activeUserId);
           if (matched) {
             setCurrentUser(matched);
             setIsAuthenticated(true);
@@ -126,6 +133,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('cisd_admin_unlocked', adminState ? 'true' : 'false');
         }
 
+        refreshData(result.user.id);
         showToast(`Welcome back, ${result.user.firstName} ${result.user.lastName}`, 'success');
         return { success: true };
       } else {
@@ -220,6 +228,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
       if (typeof window !== 'undefined') {
         localStorage.setItem('cisd_session_user_id', matched.id);
       }
+      refreshData(matched.id);
       showToast(`Switched active view to ${matched.firstName} ${matched.lastName} (${newRole.replace('_', ' ')})`, 'info');
     } else if (currentUser) {
       setCurrentUser({ ...currentUser, role: newRole });
@@ -273,6 +282,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
           if (typeof window !== 'undefined') {
             localStorage.setItem('cisd_session_user_id', emp.id);
           }
+          refreshData(emp.id);
         },
         isAuthenticated,
         isAdminUnlocked,

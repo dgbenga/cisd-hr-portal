@@ -14,12 +14,16 @@ import {
   User,
   Send
 } from 'lucide-react';
-import { Announcement, AnnouncementCategory } from '@/lib/types';
+import { Announcement, AnnouncementCategory, OrganizationArm, getOrganizationArmConfig } from '@/lib/types';
 
 export default function AnnouncementsModule() {
   const { db, currentUser, dispatch, showToast } = usePortal();
 
+  const isLineManager = currentUser.role === 'LINE_MANAGER';
+  const canBroadcast = ['SUPER_ADMIN', 'HR_ADMIN', 'EXECUTIVE', 'LINE_MANAGER'].includes(currentUser.role);
+
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
+  const [filterArm, setFilterArm] = useState<string>('ALL');
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
 
   // Form State
@@ -27,23 +31,30 @@ export default function AnnouncementsModule() {
   const [category, setCategory] = useState<AnnouncementCategory>('OFFICIAL_MEMO');
   const [content, setContent] = useState('');
   const [priority, setPriority] = useState<'NORMAL' | 'HIGH' | 'CRITICAL'>('NORMAL');
+  const [targetArm, setTargetArm] = useState<OrganizationArm | 'ALL'>(
+    isLineManager ? (currentUser.organizationArm || 'CENTRAL_HOLDING') : 'ALL'
+  );
 
   if (!db) return null;
 
   const filteredAnnouncements = db.announcements.filter(a => {
-    return filterCategory === 'ALL' || a.category === filterCategory;
+    const matchCat = filterCategory === 'ALL' || a.category === filterCategory;
+    const matchArm = filterArm === 'ALL' || a.targetArm === filterArm || a.targetArm === 'ALL';
+    return matchCat && matchArm;
   });
 
   const handleBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
+    const effectiveTargetArm = isLineManager ? (currentUser.organizationArm || 'CENTRAL_HOLDING') : targetArm;
     const res = await dispatch('CREATE_ANNOUNCEMENT', {
       title,
       category,
       content,
-      priority
+      priority,
+      targetArm: effectiveTargetArm
     });
     if (res.success) {
-      showToast('Institutional circular broadcasted to all CISD personnel', 'success');
+      showToast(`Notice broadcasted successfully for ${effectiveTargetArm === 'ALL' ? 'all entities' : effectiveTargetArm}`, 'success');
       setShowBroadcastModal(false);
       setTitle('');
       setContent('');
@@ -68,32 +79,58 @@ export default function AnnouncementsModule() {
           </p>
         </div>
 
-        {(currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'HR_ADMIN') && (
+        {canBroadcast && (
           <button
             onClick={() => setShowBroadcastModal(true)}
             className="flex items-center gap-1.5 rounded-xl bg-cisd-navy-900 px-4 py-2 text-xs font-bold text-white hover:bg-cisd-navy-800 shadow transition self-start sm:self-auto"
           >
             <Plus className="h-4 w-4 text-cisd-gold-400" />
-            Broadcast Notice
+            Broadcast Notice {isLineManager ? `(${currentUser.organizationArm})` : ''}
           </button>
         )}
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3 text-xs">
-        {['ALL', 'OFFICIAL_MEMO', 'DIPLOMATIC_EVENT', 'POLICY', 'CELEBRATION'].map(cat => (
-          <button
-            key={cat}
-            onClick={() => setFilterCategory(cat)}
-            className={`px-3 py-1.5 rounded-xl font-semibold transition ${
-              filterCategory === cat
-                ? 'bg-cisd-navy-900 text-white shadow-sm'
-                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            {cat === 'ALL' ? 'All Notices' : cat.replace('_', ' ')}
-          </button>
-        ))}
+      <div className="space-y-2 border-b border-slate-200 pb-3">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          {['ALL', 'OFFICIAL_MEMO', 'DIPLOMATIC_EVENT', 'POLICY', 'CELEBRATION'].map(cat => (
+            <button
+              key={cat}
+              onClick={() => setFilterCategory(cat)}
+              className={`px-3 py-1.5 rounded-xl font-semibold transition ${
+                filterCategory === cat
+                  ? 'bg-cisd-navy-900 text-white shadow-sm'
+                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              {cat === 'ALL' ? 'All Notice Types' : cat.replace('_', ' ')}
+            </button>
+          ))}
+        </div>
+
+        {/* Entity Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="text-slate-400 font-medium mr-1 text-[11px]">Entity:</span>
+          {[
+            { id: 'ALL', label: 'All Entities' },
+            { id: 'SWITCH_ADVISORY', label: 'Switch Advisory' },
+            { id: 'CISD', label: 'CISD (NGO)' },
+            { id: 'GX_MEDIA', label: 'GX Media House' },
+            { id: 'CENTRAL_HOLDING', label: 'Central Holding' }
+          ].map(arm => (
+            <button
+              key={arm.id}
+              onClick={() => setFilterArm(arm.id)}
+              className={`px-2.5 py-0.5 rounded-lg text-xxs font-semibold transition ${
+                filterArm === arm.id
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {arm.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Notices Feed */}
@@ -120,6 +157,15 @@ export default function AnnouncementsModule() {
                   }`}>
                     {ann.category.replace('_', ' ')}
                   </span>
+                  {ann.targetArm && ann.targetArm !== 'ALL' ? (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                      {getOrganizationArmConfig(ann.targetArm).displayName}
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                      All Entities
+                    </span>
+                  )}
                   <span className="text-xs text-slate-400">&bull; Published on {ann.publishDate}</span>
                 </div>
 
@@ -178,7 +224,7 @@ export default function AnnouncementsModule() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Category</label>
                   <select
@@ -204,6 +250,27 @@ export default function AnnouncementsModule() {
                     <option value="HIGH">High Priority</option>
                     <option value="CRITICAL">Critical Alert</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Target Entity</label>
+                  {isLineManager ? (
+                    <div className="p-2 bg-slate-100 rounded-lg text-xs font-semibold text-slate-700 truncate" title={currentUser.organizationArm}>
+                      {getOrganizationArmConfig(currentUser.organizationArm).displayName}
+                    </div>
+                  ) : (
+                    <select
+                      value={targetArm}
+                      onChange={(e) => setTargetArm(e.target.value as any)}
+                      className="w-full rounded-lg border border-slate-200 p-2 text-xs"
+                    >
+                      <option value="ALL">All Entities</option>
+                      <option value="SWITCH_ADVISORY">Switch Advisory</option>
+                      <option value="CISD">CISD</option>
+                      <option value="GX_MEDIA">GX Media</option>
+                      <option value="CENTRAL_HOLDING">Central Holding</option>
+                    </select>
+                  )}
                 </div>
               </div>
 

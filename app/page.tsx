@@ -25,6 +25,7 @@ import AnnouncementsModule from '@/components/modules/AnnouncementsModule';
 import ReportsModule from '@/components/modules/ReportsModule';
 import OrgChartModule from '@/components/modules/OrgChartModule';
 import TimesheetsModule from '@/components/modules/TimesheetsModule';
+import PayrollModule from '@/components/modules/PayrollModule';
 import SettingsModule from '@/components/modules/SettingsModule';
 import PersonalProfileModule from '@/components/modules/PersonalProfileModule';
 import LoginView from '@/components/LoginView';
@@ -76,6 +77,8 @@ export default function Home() {
         return <OrgChartModule />;
       case 'timesheets':
         return <TimesheetsModule />;
+      case 'payroll':
+        return <PayrollModule />;
       case 'settings':
         return <SettingsModule />;
       case 'profile':

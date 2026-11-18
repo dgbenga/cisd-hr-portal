@@ -44,13 +44,18 @@ export default function PerformanceModule() {
       if (r.employeeId !== currentUser.id) return false;
     } else if (isLineManager) {
       const emp = db.employees.find(e => e.id === r.employeeId);
-      if (emp?.departmentId !== currentUser.departmentId && r.employeeId !== currentUser.id) return false;
+      const isMyArm = emp?.organizationArm && emp.organizationArm === currentUser.organizationArm;
+      const isMyDept = emp?.departmentId && emp.departmentId === currentUser.departmentId;
+      if (!isMyArm && !isMyDept && r.employeeId !== currentUser.id) return false;
     }
     return selectedCycle === 'ALL' || r.cycle === selectedCycle;
   });
 
   const availableAppraisees = isLineManager
-    ? db.employees.filter(e => e.departmentId === currentUser.departmentId && e.id !== currentUser.id)
+    ? db.employees.filter(e => 
+        (e.organizationArm === currentUser.organizationArm || e.departmentId === currentUser.departmentId) && 
+        e.id !== currentUser.id
+      )
     : db.employees;
 
   const handleOpenReviewModal = () => {

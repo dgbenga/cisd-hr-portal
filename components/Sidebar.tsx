@@ -26,7 +26,8 @@ import {
   RotateCcw,
   Sparkles,
   Shield,
-  UserCheck
+  UserCheck,
+  Wallet
 } from 'lucide-react';
 import { UserRole } from '@/lib/types';
 
@@ -91,6 +92,7 @@ export default function Sidebar({ isCollapsed, onSelectTab }: SidebarProps) {
           group: 'Executive Clearances',
           items: [
             { id: 'attendance', label: 'Attendance Intelligence', icon: Clock },
+            { id: 'payroll', label: 'Group Payroll & Approvals', icon: Wallet },
             {
               id: 'leave',
               label: 'Executive Leave Approvals',
@@ -127,6 +129,7 @@ export default function Sidebar({ isCollapsed, onSelectTab }: SidebarProps) {
           group: 'Finance & Administration',
           items: [
             { id: 'dashboard', label: 'Financial Operations Center', icon: LayoutDashboard },
+            { id: 'payroll', label: 'Group Payroll & Payslips', icon: Wallet },
             { id: 'profile', label: 'My Profile & Records', icon: UserCheck },
             { id: 'announcements', label: 'Company Circulars', icon: BellRing, badge: db?.announcements.length }
           ]
@@ -172,6 +175,7 @@ export default function Sidebar({ isCollapsed, onSelectTab }: SidebarProps) {
           group: 'Workforce & Governance',
           items: [
             { id: 'employees', label: 'Employee Directory', icon: Users, count: db?.employees.length },
+            { id: 'payroll', label: 'Group Payroll & Disbursements', icon: Wallet },
             { id: 'org-chart', label: 'Organizational Hierarchy', icon: Network },
             { id: 'departments', label: 'Strategic Directorates', icon: Building, count: db?.departments.length },
             { id: 'onboarding', label: 'New Hire Onboarding', icon: UserPlus }
@@ -245,6 +249,7 @@ export default function Sidebar({ isCollapsed, onSelectTab }: SidebarProps) {
           group: 'Workforce Administration',
           items: [
             { id: 'employees', label: 'Staff Personnel Directory', icon: Users, count: db?.employees.length },
+            { id: 'payroll', label: 'Group Payroll & Audit', icon: Wallet },
             { id: 'org-chart', label: 'Organizational Hierarchy', icon: Network },
             { id: 'departments', label: 'Directorate Allocations', icon: Building, count: db?.departments.length },
             { id: 'onboarding', label: 'New Hire Indoctrination', icon: UserPlus }

@@ -19,7 +19,7 @@ import {
   UserCheck,
   ChevronRight
 } from 'lucide-react';
-import { Task, TaskPriority, TaskStatus } from '@/lib/types';
+import { Task, TaskPriority, TaskStatus, getOrganizationArmConfig, OrganizationArm } from '@/lib/types';
 
 export default function TasksModule() {
   const { db, currentUser, setSelectedEmployeeIdForModal, dispatch, showToast } = usePortal();
@@ -50,8 +50,21 @@ export default function TasksModule() {
     status: 'IN_PROGRESS' as TaskStatus,
     dueDate: '2026-11-15',
     progressPercentage: 30,
-    projectTag: 'Strategic Dialogue 2026'
+    projectTag: 'Strategic Dialogue 2026',
+    isCrossArm: false,
+    collaborationArm: 'GX_MEDIA' as OrganizationArm
   });
+
+  const eligibleAssignees = React.useMemo(() => {
+    if (!db?.employees) return [];
+    if (formData.isCrossArm) {
+      return db.employees.filter(e => e.organizationArm === 'GX_MEDIA');
+    }
+    if (isLineManager) {
+      return db.employees.filter(e => e.organizationArm === currentUser.organizationArm);
+    }
+    return db.employees;
+  }, [db?.employees, formData.isCrossArm, isLineManager, currentUser.organizationArm]);
 
   if (!db) return null;
 
@@ -82,16 +95,22 @@ export default function TasksModule() {
 
   const handleOpenCreate = () => {
     setEditingTask(null);
+    const initialAssignee = isLineManager
+      ? db.employees.find(e => e.organizationArm === currentUser.organizationArm)?.id || currentUser.id
+      : db.employees[0]?.id || 'emp-1';
+
     setFormData({
       title: '',
       description: '',
       departmentId: db.departments[0]?.id || 'dept-1',
-      assignedToId: db.employees[0]?.id || 'emp-1',
+      assignedToId: initialAssignee,
       priority: 'MEDIUM',
       status: 'NOT_STARTED',
       dueDate: '2026-11-20',
       progressPercentage: 0,
-      projectTag: 'Sahel Dialogue'
+      projectTag: 'Sahel Dialogue',
+      isCrossArm: false,
+      collaborationArm: 'GX_MEDIA'
     });
     setShowCreateModal(true);
   };
@@ -107,7 +126,9 @@ export default function TasksModule() {
       status: t.status,
       dueDate: t.dueDate,
       progressPercentage: t.progressPercentage,
-      projectTag: t.projectTag || ''
+      projectTag: t.projectTag || '',
+      isCrossArm: Boolean(t.isCrossArm),
+      collaborationArm: t.collaborationArm || 'GX_MEDIA'
     });
     setShowCreateModal(true);
   };
@@ -274,14 +295,21 @@ export default function TasksModule() {
                         key={task.id}
                         className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm space-y-2 hover:border-cisd-navy-300 transition"
                       >
-                        <div className="flex justify-between items-start gap-1">
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                            task.priority === 'URGENT' ? 'bg-rose-100 text-rose-800' :
-                            task.priority === 'HIGH' ? 'bg-amber-100 text-amber-800' :
-                            'bg-slate-100 text-slate-700'
-                          }`}>
-                            {task.priority}
-                          </span>
+                        <div className="flex justify-between items-start gap-1 flex-wrap">
+                          <div className="flex items-center gap-1">
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                              task.priority === 'URGENT' ? 'bg-rose-100 text-rose-800' :
+                              task.priority === 'HIGH' ? 'bg-amber-100 text-amber-800' :
+                              'bg-slate-100 text-slate-700'
+                            }`}>
+                              {task.priority}
+                            </span>
+                            {task.isCrossArm && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 border border-purple-200">
+                                Cross-Arm: GX
+                              </span>
+                            )}
+                          </div>
                           {task.projectTag && (
                             <span className="text-[10px] font-medium text-cisd-gold-700 truncate max-w-[120px]">
                               #{task.projectTag}
@@ -389,7 +417,14 @@ export default function TasksModule() {
                   <tr key={task.id} className="hover:bg-slate-50/70 transition">
                     <td className="py-3 px-4">
                       <div>
-                        <p className="font-bold text-slate-900">{task.title}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="font-bold text-slate-900">{task.title}</p>
+                          {task.isCrossArm && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 border border-purple-200">
+                              Cross-Arm: GX Media
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[11px] text-slate-400 line-clamp-1">{task.description}</p>
                       </div>
                     </td>
@@ -479,6 +514,37 @@ export default function TasksModule() {
                 />
               </div>
 
+              {/* Cross-Arm Delegation Option */}
+              <div className="p-3 bg-purple-50/60 border border-purple-200 rounded-xl space-y-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isCrossArm}
+                    onChange={(e) => {
+                      const isCross = e.target.checked;
+                      const nextAssignees = isCross
+                        ? db.employees.filter(emp => emp.organizationArm === 'GX_MEDIA')
+                        : isLineManager
+                        ? db.employees.filter(emp => emp.organizationArm === currentUser.organizationArm)
+                        : db.employees;
+                      setFormData({
+                        ...formData,
+                        isCrossArm: isCross,
+                        collaborationArm: 'GX_MEDIA',
+                        assignedToId: nextAssignees[0]?.id || formData.assignedToId
+                      });
+                    }}
+                    className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                  />
+                  <span className="text-xs font-bold text-purple-950">
+                    Cross-Arm Request to GX Media House (Creative & Media Production)
+                  </span>
+                </label>
+                <p className="text-xxs text-purple-700 pl-5">
+                  Route design, video, presentation, or branding deliverables directly to George Kaduna and the GX Media team.
+                </p>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Responsible Directorate</label>
@@ -494,14 +560,18 @@ export default function TasksModule() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Assignee</label>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Assignee {formData.isCrossArm ? '(GX Media House)' : isLineManager ? `(${currentUser.organizationArm})` : ''}
+                  </label>
                   <select
                     value={formData.assignedToId}
                     onChange={(e) => setFormData({ ...formData, assignedToId: e.target.value })}
                     className="w-full rounded-lg border border-slate-200 p-2 text-xs"
                   >
-                    {db.employees.map(e => (
-                      <option key={e.id} value={e.id}>{e.firstName} {e.lastName} ({e.designation})</option>
+                    {eligibleAssignees.map(e => (
+                      <option key={e.id} value={e.id}>
+                        {e.firstName} {e.lastName} ({e.designation})
+                      </option>
                     ))}
                   </select>
                 </div>

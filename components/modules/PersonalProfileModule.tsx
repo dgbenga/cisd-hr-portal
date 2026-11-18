@@ -25,9 +25,12 @@ import {
   Printer,
   ChevronRight,
   Gift,
-  PartyPopper
+  PartyPopper,
+  Wallet,
+  X,
+  Lock
 } from 'lucide-react';
-import { Employee, UserRole, getOrganizationArmConfig } from '@/lib/types';
+import { Employee, UserRole, getOrganizationArmConfig, PayrollRecord } from '@/lib/types';
 
 // Pre-curated diplomatic portraits for quick selection
 const CURATED_AVATARS = [
@@ -81,7 +84,8 @@ export default function PersonalProfileModule() {
   // UI state
   const [isSaving, setIsSaving] = useState(false);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'PHOTOS' | 'START_DATE' | 'DETAILS' | 'SECURITY'>('OVERVIEW');
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'PHOTOS' | 'START_DATE' | 'DETAILS' | 'SECURITY' | 'PAYSLIPS'>('OVERVIEW');
+  const [selectedPayslip, setSelectedPayslip] = useState<PayrollRecord | null>(null);
 
   // =========================================================================
   // DYNAMIC TENURE & ANNIVERSARY CALCULATIONS
@@ -456,6 +460,18 @@ export default function PersonalProfileModule() {
           >
             <KeyRound className="h-4 w-4" />
             <span>Account Security & Password</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('PAYSLIPS')}
+            className={`pb-3 border-b-2 flex items-center gap-2 transition ${
+              activeTab === 'PAYSLIPS'
+                ? 'border-cisd-navy-900 text-cisd-navy-950 font-black'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Wallet className="h-4 w-4" />
+            <span>My Payslips & Remuneration</span>
           </button>
         </div>
 
@@ -936,6 +952,146 @@ export default function PersonalProfileModule() {
             </div>
           </form>
         )}
+
+        {/* --- SUBTAB 6: MY PAYSLIPS & REMUNERATION --- */}
+        {activeTab === 'PAYSLIPS' && (
+          <div className="space-y-6 text-xs">
+            {/* Compensation Overview Banner */}
+            {(() => {
+              const armConfig = getOrganizationArmConfig(currentEmp.organizationArm);
+              const salaryBase = currentEmp.salary || 350000;
+
+              return (
+                <div className="rounded-2xl bg-gradient-to-r from-slate-900 to-cisd-navy-900 p-6 text-white space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <span className="text-xxs font-mono uppercase tracking-widest text-cisd-gold-400 font-bold">
+                        Official Remuneration Profile
+                      </span>
+                      <h3 className="text-lg font-bold text-white mt-1">
+                        {currentEmp.firstName} {currentEmp.lastName} &bull; {currentEmp.designation}
+                      </h3>
+                      <p className="text-xs text-slate-300">
+                        Grade: <strong className="text-cisd-gold-300">{currentEmp.gradeLevel || currentEmp.accessLevel}</strong> &bull; Entity: <strong className="text-white">{armConfig.displayName}</strong>
+                      </p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-xs border border-white/20 rounded-xl p-3 text-right">
+                      <div className="text-xxs uppercase tracking-wider text-slate-300">Target Monthly Gross</div>
+                      <div className="text-lg font-black text-cisd-gold-400">
+                        ₦{salaryBase.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+                      </div>
+                      <div className="text-xxs text-slate-300 mt-0.5">Disbursement: Corporate Direct Deposit</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-white/10 text-xxs">
+                    <div>
+                      <div className="text-slate-400">Basic Salary</div>
+                      <div className="text-xs font-bold text-white">45% of Gross</div>
+                    </div>
+                    <div>
+                      <div className="text-slate-400">Housing Allowance</div>
+                      <div className="text-xs font-bold text-white">25% of Gross</div>
+                    </div>
+                    <div>
+                      <div className="text-slate-400">Transport & Utility</div>
+                      <div className="text-xs font-bold text-white">30% (15% + 15%)</div>
+                    </div>
+                    <div>
+                      <div className="text-slate-400">Bank Destination</div>
+                      <div className="text-xs font-bold text-white">{currentEmp.personalInfo?.bankDetails?.bankName || 'GTBank'}</div>
+                      <div className="text-slate-300 font-mono">{currentEmp.personalInfo?.bankDetails?.accountNumber || 'Verified Corporate Account'}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* List of issued payslips */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-emerald-600" />
+                <span>Issued Electronic Payslips & Statements</span>
+              </h4>
+
+              {(() => {
+                const myRecords = (db.payrollRecords || []).filter(p => p.employeeId === currentEmp.id);
+
+                if (myRecords.length === 0) {
+                  return (
+                    <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                      <Wallet className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                      <div className="text-sm font-semibold text-slate-700">No Electronic Payslips Available Yet</div>
+                      <p className="text-xs text-slate-500 max-w-md mx-auto">
+                        Your electronic payslips will automatically populate here as soon as monthly payroll cycles are audited and authorized by Finance and the Executive Directorate.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                        <tr>
+                          <th className="px-4 py-3 font-semibold">Pay Period</th>
+                          <th className="px-4 py-3 font-semibold text-right">Gross Salary (₦)</th>
+                          <th className="px-4 py-3 font-semibold text-right">PAYE Tax (₦)</th>
+                          <th className="px-4 py-3 font-semibold text-right">Pension 8% (₦)</th>
+                          <th className="px-4 py-3 font-semibold text-right text-emerald-950 font-bold">Net Salary (₦)</th>
+                          <th className="px-4 py-3 font-semibold text-center">Status</th>
+                          <th className="px-4 py-3 font-semibold text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {myRecords.map(rec => (
+                          <tr key={rec.id} className="hover:bg-slate-50/70 transition">
+                            <td className="px-4 py-3.5 font-bold text-slate-900">
+                              {rec.month}
+                            </td>
+                            <td className="px-4 py-3.5 text-right font-medium text-slate-700">
+                              ₦{(rec.grossSalary ?? rec.grossPay ?? 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+                            </td>
+                            <td className="px-4 py-3.5 text-right font-medium text-amber-700">
+                              ₦{(rec.payeTax ?? rec.taxPAYE ?? 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+                            </td>
+                            <td className="px-4 py-3.5 text-right font-medium text-blue-700">
+                              ₦{(rec.pensionEmployee ?? rec.pension ?? 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+                            </td>
+                            <td className="px-4 py-3.5 text-right font-bold text-emerald-700">
+                              ₦{(rec.netSalary ?? rec.netPay ?? 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+                            </td>
+                            <td className="px-4 py-3.5 text-center">
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xxs font-semibold ${
+                                rec.status === 'DISBURSED'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : rec.status === 'APPROVED'
+                                  ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                  : 'bg-amber-50 text-amber-700 border border-amber-200'
+                              }`}>
+                                {rec.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3.5 text-right">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedPayslip(rec)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cisd-navy-50 hover:bg-cisd-navy-100 text-cisd-navy-900 rounded-lg text-xxs font-bold transition"
+                              >
+                                <FileText className="w-3.5 h-3.5 text-cisd-navy-700" />
+                                <span>View & Print</span>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}
@@ -989,15 +1145,15 @@ export default function PersonalProfileModule() {
             {/* Signatures */}
             <div className="pt-6 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600 px-8">
               <div className="text-center">
-                <p className="font-serif italic font-bold text-slate-800">Dr. Amina Bello</p>
+                <p className="font-serif italic font-bold text-slate-800">Folahan Johnson</p>
                 <div className="w-32 border-b border-slate-400 mx-auto my-1" />
-                <p className="text-[10px] text-slate-400">Super Administrator & Director</p>
+                <p className="text-[10px] text-slate-400">Executive Director (L7)</p>
               </div>
 
               <div className="text-center">
-                <p className="font-serif italic font-bold text-slate-800">Dr. Fatima Al-Mansoor</p>
+                <p className="font-serif italic font-bold text-slate-800">Yaradua Phibi</p>
                 <div className="w-32 border-b border-slate-400 mx-auto my-1" />
-                <p className="text-[10px] text-slate-400">Head of Human Resources</p>
+                <p className="text-[10px] text-slate-400">Lead, HR & Operations (L4)</p>
               </div>
             </div>
 
@@ -1017,6 +1173,198 @@ export default function PersonalProfileModule() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 5. INDIVIDUAL DIGITAL PAYSLIP MODAL (PRINTABLE)                          */}
+      {/* ========================================================================= */}
+      {selectedPayslip && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full border border-slate-200 my-8 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Actions Bar */}
+            <div className="flex items-center justify-between px-6 py-4 bg-slate-900 text-white print:hidden">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-emerald-400" />
+                <span className="font-semibold text-sm">Official Electronic Payslip</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold text-white transition"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  Print / Export
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPayslip(null)}
+                  className="p-1.5 text-slate-400 hover:text-white rounded-lg transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Printable Payslip Container */}
+            <div className="p-8 space-y-6 print:p-0">
+              {(() => {
+                const armConf = getOrganizationArmConfig(currentEmp.organizationArm);
+                const fmt = (val: number) => `₦${(val || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+
+                return (
+                  <div>
+                    <div className="flex items-start justify-between border-b border-slate-200 pb-6">
+                      <div>
+                        <div className="text-xl font-black text-slate-900 tracking-tight">
+                          {armConf.displayName.toUpperCase()}
+                        </div>
+                        <div className="text-xs font-semibold text-slate-500">
+                          Central Holding & Tripartite Operating Group • Abuja, Nigeria
+                        </div>
+                        <div className="text-xs text-slate-400 mt-1">
+                          Ref: {selectedPayslip.id} • Currency: Nigerian Naira (NGN / ₦)
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Pay Period</div>
+                        <div className="text-lg font-bold text-slate-900">{selectedPayslip.month}</div>
+                        <div className="mt-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800">
+                            {selectedPayslip.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Staff Particulars */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-b border-slate-100 text-xs">
+                      <div>
+                        <div className="text-slate-400 uppercase font-medium">Employee Name</div>
+                        <div className="font-bold text-slate-900 mt-0.5">{currentEmp.firstName} {currentEmp.lastName}</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-400 uppercase font-medium">Staff ID / Grade</div>
+                        <div className="font-bold text-slate-900 mt-0.5">{currentEmp.employeeId} ({currentEmp.accessLevel})</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-400 uppercase font-medium">Designation</div>
+                        <div className="font-bold text-slate-900 mt-0.5">{currentEmp.designation}</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-400 uppercase font-medium">Bank Destination</div>
+                        <div className="font-bold text-slate-900 mt-0.5">{selectedPayslip.bankName || currentEmp.personalInfo?.bankDetails?.bankName || 'Guaranty Trust Bank (GTBank)'}</div>
+                        <div className="text-slate-500 font-mono">{selectedPayslip.accountNumber || currentEmp.personalInfo?.bankDetails?.accountNumber || '0129482019'}</div>
+                      </div>
+                    </div>
+
+                    {/* Earnings & Deductions Tables */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                      {/* Earnings */}
+                      <div className="space-y-3">
+                        <div className="text-xs font-bold uppercase tracking-wider text-emerald-800 border-b border-emerald-100 pb-1.5 flex justify-between">
+                          <span>Earnings & Allowances</span>
+                          <span>Amount (₦)</span>
+                        </div>
+                        <div className="space-y-2 text-xs">
+                          <div className="flex justify-between text-slate-600">
+                            <span>Basic Salary (45%)</span>
+                            <span className="font-semibold text-slate-900">{fmt(selectedPayslip.basicSalary)}</span>
+                          </div>
+                          <div className="flex justify-between text-slate-600">
+                            <span>Housing Allowance (25%)</span>
+                            <span className="font-semibold text-slate-900">{fmt(selectedPayslip.housingAllowance)}</span>
+                          </div>
+                          <div className="flex justify-between text-slate-600">
+                            <span>Transport Allowance (15%)</span>
+                            <span className="font-semibold text-slate-900">{fmt(selectedPayslip.transportAllowance)}</span>
+                          </div>
+                          <div className="flex justify-between text-slate-600">
+                            <span>Utility Allowance (15%)</span>
+                            <span className="font-semibold text-slate-900">{fmt(selectedPayslip.utilityAllowance)}</span>
+                          </div>
+                          {(selectedPayslip.otherAllowances ?? 0) > 0 && (
+                            <div className="flex justify-between text-slate-600">
+                              <span>Special Allowances</span>
+                              <span className="font-semibold text-slate-900">{fmt(selectedPayslip.otherAllowances ?? 0)}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-slate-900 font-bold pt-2 border-t border-slate-100">
+                            <span>Total Gross Earnings</span>
+                            <span>{fmt(selectedPayslip.grossSalary ?? selectedPayslip.grossPay ?? 0)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Deductions */}
+                      <div className="space-y-3">
+                        <div className="text-xs font-bold uppercase tracking-wider text-rose-800 border-b border-rose-100 pb-1.5 flex justify-between">
+                          <span>Statutory Deductions</span>
+                          <span>Amount (₦)</span>
+                        </div>
+                        <div className="space-y-2 text-xs">
+                          <div className="flex justify-between text-slate-600">
+                            <span>PAYE Personal Income Tax</span>
+                            <span className="font-semibold text-rose-700">{fmt(selectedPayslip.payeTax ?? selectedPayslip.taxPAYE ?? 0)}</span>
+                          </div>
+                          <div className="flex justify-between text-slate-600">
+                            <span>Employee Pension (8%)</span>
+                            <span className="font-semibold text-rose-700">{fmt(selectedPayslip.pensionEmployee ?? selectedPayslip.pension ?? 0)}</span>
+                          </div>
+                          <div className="flex justify-between text-slate-400 italic">
+                            <span>Employer Pension (10% Co.)</span>
+                            <span>{fmt(selectedPayslip.pensionEmployer ?? Math.round((selectedPayslip.grossSalary ?? selectedPayslip.grossPay ?? 0) * 0.10))}</span>
+                          </div>
+                          <div className="flex justify-between text-slate-900 font-bold pt-2 border-t border-slate-100">
+                            <span>Total Deductions</span>
+                            <span className="text-rose-700">{fmt(selectedPayslip.totalDeductions ?? ((selectedPayslip.payeTax ?? selectedPayslip.taxPAYE ?? 0) + (selectedPayslip.pensionEmployee ?? selectedPayslip.pension ?? 0) + (selectedPayslip.otherDeductions || 0)))}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Net Pay Callout */}
+                    <div className="mt-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                      <div>
+                        <div className="text-xs uppercase font-bold text-emerald-800 tracking-wider">Take-Home Net Salary</div>
+                        <div className="text-xs text-emerald-600">Disbursed to verified corporate account</div>
+                      </div>
+                      <div className="text-2xl font-black text-emerald-900">
+                        {fmt(selectedPayslip.netSalary ?? selectedPayslip.netPay ?? 0)}
+                      </div>
+                    </div>
+
+                    {/* 4-Eyes Signatures */}
+                    <div className="mt-8 pt-6 border-t border-slate-200 grid grid-cols-3 gap-4 text-center text-xs">
+                      <div>
+                        <div className="font-script text-slate-600 text-sm italic font-semibold">Victory Kinosi</div>
+                        <div className="border-t border-slate-300 mt-1 pt-1 font-bold text-slate-800">Prepared By</div>
+                        <div className="text-slate-400 text-xxs">Finance & Admin Officer (L2)</div>
+                      </div>
+
+                      <div>
+                        <div className="font-script text-slate-600 text-sm italic font-semibold">Yaradua Phibi</div>
+                        <div className="border-t border-slate-300 mt-1 pt-1 font-bold text-slate-800">Audited By</div>
+                        <div className="text-slate-400 text-xxs">Lead, HR & Operations (L4)</div>
+                      </div>
+
+                      <div>
+                        <div className="font-script text-slate-600 text-sm italic font-semibold">Folahan Johnson</div>
+                        <div className="border-t border-slate-300 mt-1 pt-1 font-bold text-slate-800">Authorized By</div>
+                        <div className="text-slate-400 text-xxs">Executive Director (L7)</div>
+                      </div>
+                    </div>
+
+                    {/* Footer note */}
+                    <div className="mt-6 text-center text-xxs text-slate-400 italic">
+                      This is an authenticated computer-generated payslip. Conforms to the Nigerian Labour Act and Pension Reform Act 2014.
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

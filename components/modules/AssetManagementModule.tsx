@@ -781,7 +781,10 @@ export default function AssetManagementModule() {
                   onChange={(e) => setAssigneeId(e.target.value)}
                   className="w-full rounded-lg border border-slate-200 p-2 text-xs"
                 >
-                  {db.employees.map(e => (
+                  {(isLineManager
+                    ? db.employees.filter(e => e.organizationArm === currentUser.organizationArm)
+                    : db.employees
+                  ).map(e => (
                     <option key={e.id} value={e.id}>
                       {e.firstName} {e.lastName} ({e.designation})
                     </option>
