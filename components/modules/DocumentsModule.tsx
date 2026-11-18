@@ -385,22 +385,22 @@ export default function DocumentsModule() {
                 <span className="text-[10px] uppercase font-bold text-slate-400 block">Document Vault Dossier</span>
                 <p className="font-bold text-slate-900 text-sm">{previewDoc.title}</p>
                 <p className="text-slate-600 leading-relaxed">
-                  {previewDoc.description || 'Official institutional documentation certified by the Centre for International Strategic Dialogue.'}
+                  {previewDoc.description || 'Official documentation certified by Switch Advisory, CISD, and GX Media House.'}
                 </p>
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 text-[11px]">
                   <span>Uploaded: <strong className="text-slate-800">{previewDoc.uploadedDate}</strong></span>
-                  <span>Classification: <strong className="text-cisd-navy-900">{previewDoc.isCompanyWide ? 'Public Institutional' : 'Strictly Confidential'}</strong></span>
+                  <span>Classification: <strong className="text-cisd-navy-900">{previewDoc.isCompanyWide ? 'Company Wide' : 'Strictly Confidential'}</strong></span>
                 </div>
               </div>
 
               {/* Simulated Document Preview Page */}
               <div className="rounded-xl border border-slate-300 bg-white p-6 shadow-inner space-y-3 font-serif text-slate-800 leading-relaxed text-xs">
                 <div className="text-center border-b pb-3 space-y-1">
-                  <h4 className="font-black text-slate-900 uppercase tracking-widest text-sm">Centre for International Strategic Dialogue</h4>
-                  <p className="text-[10px] text-slate-500 font-sans">Diplomatic Enclave &bull; Abuja, Nigeria</p>
+                  <h4 className="font-black text-slate-900 uppercase tracking-widest text-sm">Switch Advisory &bull; CISD &bull; GX Media House</h4>
+                  <p className="text-[10px] text-slate-500 font-sans">Central Operations &bull; Abuja, Nigeria</p>
                 </div>
                 <p className="text-justify indent-4">
-                  This electronic instrument certifies the record and archiving of <span className="font-bold">{previewDoc.title}</span> within the official CISD institutional governance archives under document reference <span className="font-mono font-bold text-cisd-navy-900">{previewDoc.id}</span>.
+                  This electronic instrument certifies the record and archiving of <span className="font-bold">{previewDoc.title}</span> within the official institutional governance archives under document reference <span className="font-mono font-bold text-cisd-navy-900">{previewDoc.id}</span>.
                 </p>
                 <p className="text-justify indent-4">
                   Authorized personnel may retrieve and cite this record subject to the non-disclosure protocols set forth in the CISD Institutional Charter.

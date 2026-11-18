@@ -954,15 +954,15 @@ export default function PersonalProfileModule() {
 
             {/* Emblem */}
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-cisd-navy-900 border-2 border-cisd-gold-400 shadow-lg">
-              <span className="font-serif font-black text-lg text-cisd-gold-400 tracking-wider">CISD</span>
+              <span className="font-serif font-black text-lg text-cisd-gold-400 tracking-wider">THR</span>
             </div>
 
             <div className="space-y-1">
               <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-cisd-gold-700 font-bold">
-                Centre for International Strategic Dialogue
+                Switch Advisory &bull; CISD &bull; GX Media House
               </span>
               <h3 className="text-2xl font-serif font-black text-slate-900 tracking-tight">
-                Certificate of Diplomatic Service
+                Certificate of Service & Excellence
               </h3>
               <p className="text-xs text-slate-500 italic">Conferred in Honor of Dedicated Institutional Contribution</p>
             </div>
@@ -974,7 +974,7 @@ export default function PersonalProfileModule() {
               </h4>
               <p className="text-xs font-bold text-cisd-gold-800">{designation}</p>
               <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed pt-2">
-                For distinguished and devoted service rendered to the Centre for International Strategic Dialogue since commencement on{' '}
+                For distinguished and devoted service rendered to the organization since commencement on{' '}
                 <strong className="text-slate-900">{new Date(joinDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>,
                 marking an accomplished tenure of:
               </p>

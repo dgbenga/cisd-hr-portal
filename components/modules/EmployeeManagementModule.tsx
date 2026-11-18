@@ -364,8 +364,8 @@ export default function EmployeeManagementModule() {
     if (!createdCredentials) return;
     const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
     const text = `=========================================
-CISD HR PORTAL - OFFICIAL LOGIN CREDENTIALS
-Centre for International Strategic Dialogue
+TOSINHR PORTAL - OFFICIAL LOGIN CREDENTIALS
+Switch Advisory • CISD • GX Media House
 =========================================
 Staff Member  : ${createdCredentials.name}
 Employee ID   : ${createdCredentials.employeeId}

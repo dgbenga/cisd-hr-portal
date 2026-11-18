@@ -157,7 +157,7 @@ export default function DashboardModule() {
     const res = await dispatch('CREATE_ANNOUNCEMENT', {
       title: 'Birthday Greetings to Babatunde Fashina!',
       category: 'CELEBRATION',
-      content: `${birthdayGreeting} — Sent by ${currentUser.firstName} ${currentUser.lastName} on behalf of CISD.`,
+      content: `${birthdayGreeting} — Sent by ${currentUser.firstName} ${currentUser.lastName} on behalf of the Management Team.`,
       priority: 'NORMAL'
     });
     if (res.success) {
@@ -186,10 +186,10 @@ export default function DashboardModule() {
                 Welcome, {currentUser.firstName} {currentUser.lastName}
               </h1>
               <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-                Centre for International Strategic Dialogue executive oversight active. Total institutional workforce of{' '}
-                <span className="font-semibold text-cisd-gold-300">{totalHeadcount} diplomats and fellows</span>. Today{' '}
+                Multi-entity executive oversight active across Switch Advisory, CISD, and GX Media House. Total workforce of{' '}
+                <span className="font-semibold text-cisd-gold-300">{totalHeadcount} team members</span> across all arms. Today{' '}
                 <span className="font-semibold text-cisd-gold-300">{inOfficeToday} personnel</span> are on-site at Abuja HQ and{' '}
-                <span className="font-semibold text-cisd-gold-300">{remoteToday}</span> are on multilateral field missions.
+                <span className="font-semibold text-cisd-gold-300">{remoteToday}</span> are on remote/hybrid schedule.
               </p>
             </div>
 

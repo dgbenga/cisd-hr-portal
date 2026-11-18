@@ -24,7 +24,7 @@ export const ORGANIZATION_ARM_CONFIG: Record<OrganizationArm, OrganizationArmMet
   },
   CISD: {
     arm: 'CISD',
-    label: 'CISD (Inclusive Dialogue)',
+    label: 'CISD (Inclusive Social Development)',
     shortLabel: 'CISD',
     badgeClass: 'bg-sky-50 text-sky-800 border-sky-200',
     borderClass: 'border-sky-300',
@@ -242,6 +242,9 @@ export interface Task {
   completedAt?: string;
   progressPercentage: number;
   projectTag?: string;
+  organizationArm?: OrganizationArm;
+  collaborationArm?: OrganizationArm;
+  isCrossArm?: boolean;
 }
 
 export type MeetingType = 'STRATEGIC_DIALOGUE' | 'EXECUTIVE_BRIEFING' | 'DEPARTMENTAL' | 'ONE_ON_ONE' | 'BOARD';
@@ -414,7 +417,7 @@ export interface Announcement {
   publishDate: string;
   authorId: string;
   targetDepartmentId?: string;
-  targetArm?: OrganizationArm;
+  targetArm?: OrganizationArm | 'ALL';
   acknowledgeCount: number;
 }
 
@@ -478,3 +481,51 @@ export interface SystemAuditLog {
   module: string;
   details: string;
 }
+
+// ==========================================
+// PHASE 3: MULTI-ENTITY PAYROLL & DIGITAL PAYSLIPS
+// ==========================================
+
+export type PayrollStatus = 'DRAFT' | 'AUDITED' | 'APPROVED' | 'DISBURSED';
+
+export interface PayrollRecord {
+  id: string;
+  employeeId: string;
+  month: string; // e.g. "2026-11"
+  organizationArm: OrganizationArm;
+  currency: 'NGN';
+  basicSalary: number;      // 45% of Gross
+  housingAllowance: number; // 25% of Gross
+  transportAllowance: number; // 15% of Gross
+  utilityAllowance: number;   // 15% of Gross
+  grossPay: number;
+  taxPAYE: number;          // Statutory PAYE deduction
+  pension: number;          // Statutory 8% employee contribution
+  otherDeductions: number;
+  netPay: number;           // roundNaira(grossPay - taxPAYE - pension - otherDeductions)
+  status: PayrollStatus;
+  generatedBy: string;      // Victory Kinosi (emp-4)
+  auditedBy?: string;       // Yaradua Phibi (emp-2)
+  approvedBy?: string;      // Folahan Johnson (emp-1)
+  disbursedBy?: string;     // Victory Kinosi (emp-4)
+  disbursedAt?: string;     // ISO Timestamp
+  auditHash?: string;       // SHA-256 tamper seal
+  notes?: string;
+}
+
+export interface PayrollSummary {
+  month: string;
+  totalGross: number;
+  totalNet: number;
+  totalPAYE: number;
+  totalPension: number;
+  totalStaff: number;
+  status: PayrollStatus;
+  breakdownByArm: Record<OrganizationArm, {
+    staffCount: number;
+    totalGross: number;
+    totalNet: number;
+  }>;
+}
+
+export const roundNaira = (val: number): number => Math.round((val + Number.EPSILON) * 100) / 100;

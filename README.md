@@ -1,33 +1,35 @@
-# CISD HR Portal — Centre for International Strategic Dialogue
+# TosinHR Portal — Switch Advisory • CISD • GX Media House
 
-An enterprise-grade, fully functional Human Resource Management System built specifically for the **Centre for International Strategic Dialogue (CISD)** — an international policy think-tank and multilateral dialogue facilitator based in Abuja, Nigeria.
+An enterprise-grade, multi-entity Human Resource Management System built for **Switch Advisory** (strategy & consulting), **CISD** (Centre for Inclusive Social Development — NGO / non-profit), **GX Media House** (creative & media production), and **Central Holding & Governance** based in Abuja, Nigeria.
 
-Inspired by the modular simplicity of Zoho People, the CISD HR Portal features an original institutional identity designed with **Executive Navy Blue (`#0F2744`, `#09182B`)**, **Clean White**, **Soft Slate Grey (`#F8FAFC`)**, and **Refined Diplomatic Gold Accents (`#C69F37`)**.
+Inspired by the modular simplicity of modern enterprise HR platforms, the TosinHR Portal features an original tripartite institutional identity designed with **Executive Navy Blue (`#0F2744`, `#09182B`)**, **Clean White**, **Soft Slate Grey (`#F8FAFC`)**, and **Refined Diplomatic Gold Accents (`#C69F37`)**, complemented by entity-specific WCAG AA compliant badge accents for each sister arm.
 
 ---
 
 ## 🌟 Key Highlights & Architectural Features
 
-1. **Persistent Database Storage (`data/cisd_db.json`):**
-   * Real, persistent file-backed database engine.
-   * Changes survive page reloads and server restarts.
-   * Includes one-click factory reset to restore official CISD institutional seed data anytime.
+1. **Persistent Dual-Engine Database Storage (`data/cisd.sqlite` & `data/cisd_db.json`):**
+   * Real, persistent file-backed SQLite database with automated WAL mode.
+   * Changes survive page reloads and server restarts with seamless Vercel cold-start hydration.
+   * Full historical tracking with immutable entity snapshotting on timesheets and leave requests.
 
-2. **Full Ecosystem Interconnection (No Data Silos):**
-   * **Adding a new staff member** immediately updates total headcount, adds them to their department roster, provisions their leave entitlements, allocates their weekly hybrid schedule, initiates their onboarding checklist, and renders them into the Organizational Hierarchy Chart.
-   * **Clocking in/out** dynamically calculates lateness thresholds past 08:30 AM, logs locations (Abuja HQ vs. Remote Workstation), and updates daily executive attendance stats.
-   * **Approving a leave request** instantly deducts days from the employee's balance meter and marks their status as `ON_LEAVE` on the daily attendance register.
-   * **Assigning an asset** (MacBook Pro, ThinkPad, vehicle, biometric token) immediately displays in the central Asset Register and links into the employee's 360° Dossier.
-   * **Hybrid schedule shift requests** update the weekly roster and feed the live **"Expected in Office Today"** seat monitor.
-   * **Timesheets** allow weekly project hour tracking against CISD initiatives (e.g. Sahel Peace & Security, AfCFTA Critical Minerals).
+2. **Multi-Entity Tripartite Scoping & Ecosystem Interconnection:**
+   * **Multi-Arm Filtering & Badges:** Seamless filtering across Switch Advisory, CISD, GX Media, and Central Holding.
+   * **Scoped Line Manager Approvals:** Team Leads (George Kaduna for GX, Chinonso Aluma for Switch, Marcus Ogunfolaju for CISD) only adjudicate submissions from their respective entities, guarded by server-side BOLA validation.
+   * **Adding a new staff member** immediately updates total headcount, tags them to their entity and grade level (`L0`–`L7`), and integrates them across directory, attendance, leaves, and org charts.
+   * **Clocking in/out** dynamically calculates lateness thresholds past 08:30 AM, logs locations, and updates attendance metrics.
+   * **Approving a leave request** instantly deducts days from the employee's balance meter with anti-self-approval protection.
+   * **Timesheets** allow weekly project hour tracking with entity-scoped review workflows.
 
 3. **Multi-Role RBAC Simulation (Persona Switcher):**
-   * Instant persona switcher in the top navigation bar allowing testing of all roles:
-     * **Super Administrator:** Dr. Amina Bello (Executive Director & Chief Executive)
-     * **HR Administrator:** Olumide Adeyemi (Director of HR & Administration)
-     * **Line Manager:** Amb. Ibrahim Mukhtar (Director of Research & Policy Dialogue)
-     * **Senior Staff / Fellow:** Dr. Chidi Okonkwo (Senior Strategic Policy Fellow)
-     * **New Hire on Probation:** Aisha Mohammed (Research Analyst - Energy Transition)
+   * Instant persona switcher in the top navigation bar allowing testing of all real operational roles:
+     * **Executive Director (L7):** Folahan Johnson (FJ) (Oversees all three arms)
+     * **Lead HR Administrator (L4):** Yaradua Phibi (Full administrative control)
+     * **HR Admin Assistant (L2):** Oluwatosin Onemola (Tosin) (HR operations)
+     * **Finance & Admin Officer (L2):** Victory Kinosi (Group-wide finance desk)
+     * **GX Media Lead (L5):** George Kaduna (Line Manager for GX Media House)
+     * **Switch Advisory Lead (L5):** Chinonso Aluma (Line Manager for Switch Advisory)
+     * **CISD Lead (L6):** Marcus Ogunfolaju (Line Manager for Centre for Inclusive Social Development)
 
 ---
 

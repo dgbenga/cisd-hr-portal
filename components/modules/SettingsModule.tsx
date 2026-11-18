@@ -25,11 +25,11 @@ export default function SettingsModule() {
   const [activeSettingsTab, setActiveSettingsTab] = useState<'ORGANIZATION' | 'POLICIES' | 'AUDIT'>('ORGANIZATION');
 
   // Form State initialized from db.settings
-  const [name, setName] = useState(db?.settings.name || 'Centre for International Strategic Dialogue');
-  const [abbrev, setAbbrev] = useState(db?.settings.abbreviation || 'CISD');
-  const [hq, setHq] = useState(db?.settings.headquarters || 'Diplomatic Enclave, Abuja, Nigeria');
-  const [tagline, setTagline] = useState(db?.settings.tagline || 'Bridging Nations Through Impartial Strategic Foresight');
-  const [email, setEmail] = useState(db?.settings.email || 'secretariat@cisdialogue.org');
+  const [name, setName] = useState(db?.settings.name || 'Switch Advisory • CISD • GX Media House');
+  const [abbrev, setAbbrev] = useState(db?.settings.abbreviation || 'TosinHR');
+  const [hq, setHq] = useState(db?.settings.headquarters || 'Central Business District, Abuja, Nigeria');
+  const [tagline, setTagline] = useState(db?.settings.tagline || 'Unified Multi-Entity Operations: Strategy, Development & Creative Media');
+  const [email, setEmail] = useState(db?.settings.email || 'hr@switchadvisory.com');
   const [phone, setPhone] = useState(db?.settings.phone || '+234 9 461 9000');
   const [minOfficeDays, setMinOfficeDays] = useState(db?.settings.hybridPolicy.minimumOfficeDays || 3);
   const [annualEntitlement, setAnnualEntitlement] = useState(db?.settings.leaveEntitlements.annual || 21);
@@ -211,7 +211,7 @@ export default function SettingsModule() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Diplomatic Switchboard Phone</label>
+                <label className="block font-semibold text-slate-700 mb-1">HQ Office Phone</label>
                 <input
                   type="text"
                   value={phone}

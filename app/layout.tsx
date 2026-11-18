@@ -4,8 +4,8 @@ import { PortalProvider } from '@/context/PortalContext';
 import ToastContainer from '@/components/ToastContainer';
 
 export const metadata: Metadata = {
-  title: 'CISD HR Portal - Centre for International Strategic Dialogue',
-  description: 'Enterprise Human Resource Management System for CISD',
+  title: 'TosinHR Portal — Switch Advisory • CISD • GX Media',
+  description: 'Multi-Entity Human Resource Management System for Switch Advisory, CISD, and GX Media House',
 };
 
 export default function RootLayout({

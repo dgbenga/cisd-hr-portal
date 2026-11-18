@@ -35,7 +35,8 @@ import {
   Announcement,
   Timesheet,
   OrganizationSettings,
-  SystemAuditLog
+  SystemAuditLog,
+  PayrollRecord
 } from './types';
 import {
   initialDepartments,
@@ -57,7 +58,8 @@ import {
   initialAnnouncements,
   initialTimesheets,
   initialSettings,
-  initialAuditLogs
+  initialAuditLogs,
+  initialPayrollRecords
 } from './initial-data';
 import {
   getSqliteDb,
@@ -89,6 +91,7 @@ export interface DatabaseSchema {
   trainingCourses: TrainingCourse[];
   announcements: Announcement[];
   timesheets: Timesheet[];
+  payrollRecords: PayrollRecord[];
   settings: OrganizationSettings;
   auditLogs: SystemAuditLog[];
 }
@@ -140,6 +143,7 @@ export function getInitialDatabase(): DatabaseSchema {
     trainingCourses: initialTrainingCourses,
     announcements: initialAnnouncements,
     timesheets: initialTimesheets,
+    payrollRecords: initialPayrollRecords,
     settings: initialSettings,
     auditLogs: initialAuditLogs
   };

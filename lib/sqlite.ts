@@ -36,7 +36,8 @@ import {
   Announcement,
   Timesheet,
   OrganizationSettings,
-  SystemAuditLog
+  SystemAuditLog,
+  PayrollRecord
 } from './types';
 import {
   initialDepartments,
@@ -58,7 +59,8 @@ import {
   initialAnnouncements,
   initialTimesheets,
   initialSettings,
-  initialAuditLogs
+  initialAuditLogs,
+  initialPayrollRecords
 } from './initial-data';
 import { DatabaseSchema } from './db';
 
@@ -409,6 +411,32 @@ function initSqliteSchema(db: Database.Database): void {
       details TEXT NOT NULL
     );
 
+    -- 21. PAYROLL RECORDS (PHASE 3)
+    CREATE TABLE IF NOT EXISTS payroll_records (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL,
+      month TEXT NOT NULL,
+      organization_arm TEXT NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'NGN',
+      basic_salary REAL NOT NULL,
+      housing_allowance REAL NOT NULL,
+      transport_allowance REAL NOT NULL,
+      utility_allowance REAL NOT NULL,
+      gross_pay REAL NOT NULL,
+      tax_paye REAL NOT NULL,
+      pension REAL NOT NULL,
+      other_deductions REAL NOT NULL DEFAULT 0,
+      net_pay REAL NOT NULL,
+      status TEXT NOT NULL,
+      generated_by TEXT NOT NULL,
+      audited_by TEXT,
+      approved_by TEXT,
+      disbursed_by TEXT,
+      disbursed_at TEXT,
+      audit_hash TEXT,
+      notes TEXT
+    );
+
     -- INDEXES FOR PERFORMANCE
     CREATE INDEX IF NOT EXISTS idx_employees_dept ON employees(department_id);
     CREATE INDEX IF NOT EXISTS idx_attendance_emp_date ON attendance_records(employee_id, date);
@@ -416,6 +444,8 @@ function initSqliteSchema(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assigned_to_id);
     CREATE INDEX IF NOT EXISTS idx_assets_assigned ON assets(assigned_to_id);
     CREATE INDEX IF NOT EXISTS idx_audit_time ON system_audit_logs(timestamp);
+    CREATE INDEX IF NOT EXISTS idx_payroll_emp_month ON payroll_records(employee_id, month);
+    CREATE INDEX IF NOT EXISTS idx_payroll_arm ON payroll_records(organization_arm);
   `);
 
   // Migrations: Ensure newer columns exist
@@ -424,6 +454,9 @@ function initSqliteSchema(db: Database.Database): void {
   try { db.exec('ALTER TABLE employees ADD COLUMN access_level TEXT;'); } catch (_) {}
   try { db.exec('ALTER TABLE departments ADD COLUMN organization_arm TEXT;'); } catch (_) {}
   try { db.exec('ALTER TABLE announcements ADD COLUMN target_arm TEXT;'); } catch (_) {}
+  try { db.exec('ALTER TABLE tasks ADD COLUMN organization_arm TEXT;'); } catch (_) {}
+  try { db.exec('ALTER TABLE tasks ADD COLUMN collaboration_arm TEXT;'); } catch (_) {}
+  try { db.exec('ALTER TABLE tasks ADD COLUMN is_cross_arm INTEGER DEFAULT 0;'); } catch (_) {}
 
   // Auto-seed or upgrade migration
   let shouldReseed = false;
@@ -446,6 +479,31 @@ function initSqliteSchema(db: Database.Database): void {
       db.pragma('wal_checkpoint(TRUNCATE)');
     } catch (_) {}
   }
+
+  // Check if payroll_records is empty; if so, populate initial payroll
+  try {
+    const payCount = db.prepare('SELECT count(*) as c FROM payroll_records').get() as { c: number };
+    if (payCount.c === 0 && initialPayrollRecords && initialPayrollRecords.length > 0) {
+      const insertPay = db.prepare(`
+        INSERT INTO payroll_records (
+          id, employee_id, month, organization_arm, currency, basic_salary, housing_allowance,
+          transport_allowance, utility_allowance, gross_pay, tax_paye, pension, other_deductions,
+          net_pay, status, generated_by, audited_by, approved_by, disbursed_by, disbursed_at, audit_hash, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      const pTx = db.transaction(() => {
+        for (const p of initialPayrollRecords) {
+          insertPay.run(
+            p.id, p.employeeId, p.month, p.organizationArm, p.currency, p.basicSalary, p.housingAllowance,
+            p.transportAllowance, p.utilityAllowance, p.grossPay, p.taxPAYE, p.pension, p.otherDeductions,
+            p.netPay, p.status, p.generatedBy, p.auditedBy || null, p.approvedBy || null,
+            p.disbursedBy || null, p.disbursedAt || null, p.auditHash || null, p.notes || null
+          );
+        }
+      });
+      pTx();
+    }
+  } catch (_) {}
 }
 
 /**
@@ -453,7 +511,8 @@ function initSqliteSchema(db: Database.Database): void {
  */
 export function seedSqliteDatabase(db: Database.Database): void {
   const seedTx = db.transaction(() => {
-    // Clear all existing records
+    // Clear all existing records (delete child records first)
+    db.prepare('DELETE FROM payroll_records').run();
     db.prepare('DELETE FROM departments').run();
     db.prepare('DELETE FROM employees').run();
     db.prepare('DELETE FROM attendance_records').run();
@@ -712,6 +771,23 @@ export function seedSqliteDatabase(db: Database.Database): void {
     `);
     for (const al of initialAuditLogs) {
       insertLog.run(al.id, al.timestamp, al.userId, al.userName, al.action, al.module, al.details);
+    }
+
+    // 21. Payroll Records
+    const insertPay = db.prepare(`
+      INSERT INTO payroll_records (
+        id, employee_id, month, organization_arm, currency, basic_salary, housing_allowance,
+        transport_allowance, utility_allowance, gross_pay, tax_paye, pension, other_deductions,
+        net_pay, status, generated_by, audited_by, approved_by, disbursed_by, disbursed_at, audit_hash, notes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const p of initialPayrollRecords) {
+      insertPay.run(
+        p.id, p.employeeId, p.month, p.organizationArm, p.currency, p.basicSalary, p.housingAllowance,
+        p.transportAllowance, p.utilityAllowance, p.grossPay, p.taxPAYE, p.pension, p.otherDeductions,
+        p.netPay, p.status, p.generatedBy, p.auditedBy || null, p.approvedBy || null,
+        p.disbursedBy || null, p.disbursedAt || null, p.auditHash || null, p.notes || null
+      );
     }
   });
 
@@ -1038,6 +1114,38 @@ export function getSqliteDatabaseSnapshot(): DatabaseSchema {
     details: r.details
   }));
 
+  // 21. Payroll Records
+  let payrollRecords: PayrollRecord[] = [];
+  try {
+    const payRows = db.prepare('SELECT * FROM payroll_records ORDER BY month DESC').all() as any[];
+    payrollRecords = payRows.map(r => ({
+      id: r.id,
+      employeeId: r.employee_id,
+      month: r.month,
+      organizationArm: r.organization_arm,
+      currency: r.currency || 'NGN',
+      basicSalary: r.basic_salary,
+      housingAllowance: r.housing_allowance,
+      transportAllowance: r.transport_allowance,
+      utilityAllowance: r.utility_allowance,
+      grossPay: r.gross_pay,
+      taxPAYE: r.tax_paye,
+      pension: r.pension,
+      otherDeductions: r.other_deductions || 0,
+      netPay: r.net_pay,
+      status: r.status,
+      generatedBy: r.generated_by,
+      auditedBy: r.audited_by || undefined,
+      approvedBy: r.approved_by || undefined,
+      disbursedBy: r.disbursed_by || undefined,
+      disbursedAt: r.disbursed_at || undefined,
+      auditHash: r.audit_hash || undefined,
+      notes: r.notes || undefined
+    }));
+  } catch (_) {
+    payrollRecords = initialPayrollRecords;
+  }
+
   return {
     departments,
     employees,
@@ -1057,6 +1165,7 @@ export function getSqliteDatabaseSnapshot(): DatabaseSchema {
     trainingCourses,
     announcements,
     timesheets,
+    payrollRecords,
     settings,
     auditLogs
   };
@@ -1091,6 +1200,9 @@ export function saveDatabaseSnapshotToSqlite(data: DatabaseSchema): void {
   const db = getSqliteDb();
 
   const syncTx = db.transaction(() => {
+    // 0. Delete child records before parents
+    db.prepare('DELETE FROM payroll_records').run();
+
     // 1. Departments
     db.prepare('DELETE FROM departments').run();
     const insertDept = db.prepare(`
@@ -1351,6 +1463,26 @@ export function saveDatabaseSnapshotToSqlite(data: DatabaseSchema): void {
       `);
       for (const al of data.auditLogs) {
         insertLog.run(al.id, al.timestamp, al.userId, al.userName, al.action, al.module, al.details);
+      }
+    }
+
+    // 21. Payroll Records
+    if (data.payrollRecords && data.payrollRecords.length > 0) {
+      db.prepare('DELETE FROM payroll_records').run();
+      const insertPay = db.prepare(`
+        INSERT INTO payroll_records (
+          id, employee_id, month, organization_arm, currency, basic_salary, housing_allowance,
+          transport_allowance, utility_allowance, gross_pay, tax_paye, pension, other_deductions,
+          net_pay, status, generated_by, audited_by, approved_by, disbursed_by, disbursed_at, audit_hash, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      for (const p of data.payrollRecords) {
+        insertPay.run(
+          p.id, p.employeeId, p.month, p.organizationArm, p.currency || 'NGN', p.basicSalary, p.housingAllowance,
+          p.transportAllowance, p.utilityAllowance, p.grossPay, p.taxPAYE, p.pension, p.otherDeductions || 0,
+          p.netPay, p.status, p.generatedBy, p.auditedBy || null, p.approvedBy || null,
+          p.disbursedBy || null, p.disbursedAt || null, p.auditHash || null, p.notes || null
+        );
       }
     }
   });

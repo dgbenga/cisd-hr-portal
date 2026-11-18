@@ -90,10 +90,10 @@ export default function Home() {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-cisd-navy-950 text-white">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-cisd-navy-900 border-2 border-cisd-gold-500 shadow-2xl animate-bounce">
-          <span className="font-black text-xl text-cisd-gold-400">CISD</span>
+          <span className="font-black text-xl text-cisd-gold-400">THR</span>
         </div>
-        <h2 className="mt-4 text-base font-bold text-white tracking-wide">CISD HR Portal</h2>
-        <p className="text-xs text-slate-400 mt-1">Connecting to Centre for International Strategic Dialogue Secure Vault...</p>
+        <h2 className="mt-4 text-base font-bold text-white tracking-wide">TosinHR Portal</h2>
+        <p className="text-xs text-slate-400 mt-1">Connecting to Switch Advisory • CISD • GX Media Secure Vault...</p>
         <div className="mt-4 flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-cisd-gold-400 animate-ping" />
           <span className="text-[11px] text-cisd-gold-300 font-medium">Loading Persistent Records...</span>

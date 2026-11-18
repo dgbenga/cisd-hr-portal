@@ -77,7 +77,7 @@ export default function OrgChartModule() {
             </h3>
             <p className="text-xs text-slate-300 font-medium">{executiveDirector.designation}</p>
             <p className="text-[11px] text-cisd-gold-400 font-semibold mt-1">
-              Centre for International Strategic Dialogue
+              Switch Advisory • CISD • GX Media House
             </p>
 
             <div className="mt-3 flex items-center justify-center gap-3 text-[11px] text-slate-400 border-t border-slate-800 pt-2 w-full">

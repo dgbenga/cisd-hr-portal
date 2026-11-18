@@ -164,16 +164,16 @@ export default function Navbar({ onToggleSidebar, isSidebarCollapsed }: NavbarPr
           className="flex items-center gap-2.5 cursor-pointer"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cisd-navy-900 text-cisd-gold-400 font-bold text-sm tracking-wider shadow">
-            CISD
+            THR
           </div>
           <div className="hidden sm:block">
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-slate-900 text-sm tracking-tight">CISD HR Portal</span>
+              <span className="font-bold text-slate-900 text-sm tracking-tight">TosinHR Portal</span>
               <span className="rounded bg-cisd-gold-100 px-1.5 py-0.5 text-[10px] font-semibold text-cisd-gold-800">
                 Enterprise
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 leading-none">Centre for International Strategic Dialogue</p>
+            <p className="text-[11px] text-slate-500 leading-none">Switch Advisory &bull; CISD &bull; GX Media</p>
           </div>
         </div>
       </div>
@@ -293,7 +293,7 @@ export default function Navbar({ onToggleSidebar, isSidebarCollapsed }: NavbarPr
                 )}
               </div>
             ) : (
-              <p className="text-center text-slate-400 py-3 italic">No matching records found across CISD vault.</p>
+              <p className="text-center text-slate-400 py-3 italic">No matching records found across portal.</p>
             )}
           </div>
         )}
@@ -403,7 +403,7 @@ export default function Navbar({ onToggleSidebar, isSidebarCollapsed }: NavbarPr
         <button
           onClick={() => setShowHelpModal(true)}
           className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition"
-          title="CISD HR Support & Protocol Help"
+          title="TosinHR Support & Help"
         >
           <HelpCircle className="h-4 w-4" />
         </button>

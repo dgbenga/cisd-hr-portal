@@ -154,11 +154,11 @@ export default function LoginView() {
       <header className="relative z-10 w-full px-6 py-4 flex items-center justify-between border-b border-white/10 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cisd-navy-900 to-cisd-navy-950 border border-cisd-gold-400 shadow-md">
-            <span className="font-serif font-black text-xs tracking-wider text-cisd-gold-400">CISD</span>
+            <span className="font-serif font-black text-xs tracking-wider text-cisd-gold-400">THR</span>
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-white">Centre for International Strategic Dialogue</h1>
-            <p className="text-[10px] text-slate-400">Institutional Human Resource & Operations Portal</p>
+            <h1 className="text-sm font-bold tracking-tight text-white">Switch Advisory &bull; CISD &bull; GX Media House</h1>
+            <p className="text-[10px] text-slate-400">TosinHR Multi-Entity Human Resource & Operations Portal</p>
           </div>
         </div>
 
@@ -192,18 +192,18 @@ export default function LoginView() {
           <div className="lg:col-span-5 space-y-6 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 rounded-full border border-cisd-gold-400/30 bg-cisd-gold-500/10 px-3 py-1 text-xs font-semibold text-cisd-gold-300">
               <Shield className="h-3.5 w-3.5 text-cisd-gold-400" />
-              Official Diplomatic Network
+              Unified Multi-Entity Ecosystem
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
-              Strategic Dialogue. <br />
+              Switch Advisory. CISD. <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cisd-gold-300 via-cisd-gold-400 to-amber-200">
-                Institutional Excellence.
+                GX Media House.
               </span>
             </h2>
 
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-md mx-auto lg:mx-0">
-              Welcome to the CISD personnel operations ecosystem. Access your employee dossier, attendance tracking, hybrid schedule roster, and strategic task assignments.
+              Welcome to the TosinHR multi-entity operations portal. Access your employee dossier, attendance tracking, hybrid schedules, timesheets, and line manager approvals across all sister arms.
             </p>
 
             <div className="grid grid-cols-2 gap-3 pt-2 text-left">
@@ -364,8 +364,8 @@ export default function LoginView() {
 
       {/* Footer */}
       <footer className="relative z-10 w-full px-6 py-4 text-center text-xs text-slate-500 border-t border-white/5">
-        <p>&copy; {new Date().getFullYear()} Centre for International Strategic Dialogue (CISD). All rights reserved.</p>
-        <p className="text-[10px] text-slate-600 mt-0.5">Maitama Diplomatic Enclave, Abuja, FCT, Nigeria &bull; Strictly Confidential</p>
+        <p>&copy; {new Date().getFullYear()} Switch Advisory &bull; CISD &bull; GX Media House (TosinHR). All rights reserved.</p>
+        <p className="text-[10px] text-slate-600 mt-0.5">Central Business District, Abuja, FCT, Nigeria &bull; Strictly Confidential</p>
       </footer>
 
       {/* EXECUTIVE MASTER KEY MODAL (Checks AdminTosin123 on the server) */}

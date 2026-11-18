@@ -171,17 +171,17 @@ export default function ReportsModule() {
         <div className="border-b border-slate-200 pb-4 flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-black text-cisd-navy-900 text-base tracking-wider">CISD</span>
+              <span className="font-black text-cisd-navy-900 text-base tracking-wider">THR</span>
               <span className="text-xs text-slate-400 font-bold uppercase">&bull; Executive Statistical Report</span>
             </div>
             <h3 className="text-lg font-bold text-slate-900 mt-1">
-              Centre for International Strategic Dialogue &bull; {reportType} Report
+              Switch Advisory &bull; CISD &bull; GX Media House &bull; {reportType} Report
             </h3>
-            <p className="text-xs text-slate-500">Generated on: 05 November 2026 &bull; Scope: {filterDept === 'ALL' ? 'Institution-wide' : filterDept}</p>
+            <p className="text-xs text-slate-500">Generated on: 05 November 2026 &bull; Scope: {filterDept === 'ALL' ? 'Group-wide' : filterDept}</p>
           </div>
           <div className="text-right">
             <span className="rounded bg-cisd-gold-100 text-cisd-gold-800 text-[10px] font-bold px-2 py-0.5 uppercase">
-              Official Institutional Record
+              Official Group Record
             </span>
           </div>
         </div>
