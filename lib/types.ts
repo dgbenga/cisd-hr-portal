@@ -564,3 +564,55 @@ export interface PayrollSummary {
 }
 
 export const roundNaira = (val: number): number => Math.round((val + Number.EPSILON) * 100) / 100;
+
+// ==========================================
+// PHASE 4: EXECUTIVE INTELLIGENCE & TRIPARTITE HIERARCHY
+// ==========================================
+
+export type ExecutiveReportType = 
+  | 'HEADCOUNT' 
+  | 'ATTENDANCE' 
+  | 'LEAVE' 
+  | 'ASSETS' 
+  | 'PROJECTS' 
+  | 'PAYROLL';
+
+export interface EntityHealthSummary {
+  arm: OrganizationArm;
+  label: string;
+  leadName: string;
+  leadDesignation: string;
+  leadId: string;
+  headcount: number;
+  inOfficeToday: number;
+  remoteToday: number;
+  presenceRate: number; // Formula: Math.round(((inOfficeToday + remoteToday) / Math.max(1, headcount)) * 100)
+  pendingApprovalsCount: number;
+  totalPayrollGross: number;
+  totalPayrollNet: number;
+}
+
+export interface TripartiteOrgNode {
+  id: string;
+  employeeId: string;
+  name: string;
+  designation: string;
+  avatar: string;
+  arm: OrganizationArm;
+  role: UserRole;
+  accessLevel: AccessLevel;
+  reportingManagerId?: string;
+  isCrossArmReporting?: boolean;
+  administrativeManagerName?: string;
+  directReportsCount: number;
+}
+
+export function sanitizeCsvCell(value: any): string {
+  if (value === null || value === undefined) return '""';
+  let str = String(value);
+  // Neutralize formula injection (CWE-1236)
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = `'${str}`;
+  }
+  return `"${str.replace(/"/g, '""')}"`;
+}

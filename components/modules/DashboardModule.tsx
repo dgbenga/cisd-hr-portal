@@ -32,9 +32,10 @@ import {
   Play,
   CheckCheck,
   Video,
-  Timer
+  Timer,
+  Filter
 } from 'lucide-react';
-import { UserRole, TaskStatus } from '@/lib/types';
+import { UserRole, TaskStatus, OrganizationArm, getOrganizationArmConfig } from '@/lib/types';
 
 export default function DashboardModule() {
   const { db, currentUser, setActiveTab, setSelectedEmployeeIdForModal, dispatch, showToast } = usePortal();
@@ -48,35 +49,62 @@ export default function DashboardModule() {
   const [leaveDays, setLeaveDays] = useState(5);
   const [leaveReason, setLeaveReason] = useState('');
 
+  // Phase 4: Tripartite Entity Filter state for Executive & HR command centers
+  const [filterArm, setFilterArm] = useState<'ALL' | OrganizationArm>('ALL');
+
   if (!db) return null;
 
   const role: UserRole = currentUser.role || 'SUPER_ADMIN';
 
-  // Global counts
+  // Dynamic date resolution for today's attendance
+  const baseTodayStr = '2026-11-05';
+  const hasBaseRecords = db.attendanceRecords.some(a => a.date === baseTodayStr);
+  const todayStr = hasBaseRecords 
+    ? baseTodayStr 
+    : (db.attendanceRecords.length > 0 
+        ? db.attendanceRecords[db.attendanceRecords.length - 1].date 
+        : new Date().toISOString().split('T')[0]);
+
+  const attendanceToday = db.attendanceRecords.filter(a => a.date === todayStr);
+
+  // Filtered employees based on active entity filter
+  const filteredEmployees = filterArm === 'ALL' 
+    ? db.employees 
+    : db.employees.filter(e => e.organizationArm === filterArm);
+  const filteredHeadcount = filteredEmployees.length;
+  const filteredActiveStaff = filteredEmployees.filter(e => e.status === 'ACTIVE' || e.status === 'ON_PROBATION').length;
+  const filteredProbationStaff = filteredEmployees.filter(e => e.status === 'ON_PROBATION');
+  const filteredEmployeeIds = filteredEmployees.map(e => e.id);
+
+  const filteredAttendanceToday = attendanceToday.filter(a => filteredEmployeeIds.includes(a.employeeId));
+  const inOfficeToday = filteredAttendanceToday.filter(a => a.workType === 'OFFICE' && a.status !== 'ON_LEAVE').length;
+  const remoteToday = filteredAttendanceToday.filter(a => a.workType === 'REMOTE').length;
+  const lateToday = filteredAttendanceToday.filter(a => a.status === 'LATE').length;
+  const presenceRate = Math.round(((inOfficeToday + remoteToday) / Math.max(1, filteredHeadcount)) * 100);
+
+  // Global counts for fallback / reference
   const totalHeadcount = db.employees.length;
   const activeStaff = db.employees.filter(e => e.status === 'ACTIVE' || e.status === 'ON_PROBATION').length;
   const probationStaff = db.employees.filter(e => e.status === 'ON_PROBATION');
 
-  const todayStr = '2026-11-05';
-  const attendanceToday = db.attendanceRecords.filter(a => a.date === todayStr);
-  const inOfficeToday = attendanceToday.filter(a => a.workType === 'OFFICE' && a.status !== 'ON_LEAVE').length;
-  const remoteToday = attendanceToday.filter(a => a.workType === 'REMOTE').length;
-  const lateToday = attendanceToday.filter(a => a.status === 'LATE').length;
+  const allPendingLeaves = db.leaveRequests.filter(l => l.status === 'PENDING' && filteredEmployeeIds.includes(l.employeeId));
+  const allPendingTimesheets = db.timesheets.filter(t => t.status === 'SUBMITTED' && filteredEmployeeIds.includes(t.employeeId));
+  const filteredTasks = db.tasks.filter(t => filterArm === 'ALL' || t.organizationArm === filterArm || filteredEmployeeIds.includes(t.assignedToId));
+  const overdueTasks = filteredTasks.filter(t => t.status === 'OVERDUE');
 
-  const allPendingLeaves = db.leaveRequests.filter(l => l.status === 'PENDING');
-  const allPendingTimesheets = db.timesheets.filter(t => t.status === 'SUBMITTED');
-  const overdueTasks = db.tasks.filter(t => t.status === 'OVERDUE');
-
-  // Department-specific for Line Manager
+  // Scoped for Line Manager (Sister Arm)
+  const lineManagerArm = currentUser.organizationArm || 'CENTRAL_HOLDING';
   const myDepartment = db.departments.find(d => d.id === currentUser.departmentId);
-  const teamMembers = db.employees.filter(e => e.departmentId === currentUser.departmentId);
+  const teamMembers = db.employees.filter(e => 
+    (currentUser.organizationArm ? e.organizationArm === currentUser.organizationArm : e.departmentId === currentUser.departmentId)
+  );
   const teamMemberIds = teamMembers.map(e => e.id);
   const teamAttendanceToday = attendanceToday.filter(a => teamMemberIds.includes(a.employeeId));
   const teamInOfficeToday = teamAttendanceToday.filter(a => a.workType === 'OFFICE').length;
   const teamRemoteToday = teamAttendanceToday.filter(a => a.workType === 'REMOTE').length;
-  const teamPendingLeaves = allPendingLeaves.filter(l => teamMemberIds.includes(l.employeeId));
-  const teamPendingTimesheets = allPendingTimesheets.filter(t => teamMemberIds.includes(t.employeeId));
-  const teamTasks = db.tasks.filter(t => teamMemberIds.includes(t.assignedToId));
+  const teamPendingLeaves = db.leaveRequests.filter(l => l.status === 'PENDING' && teamMemberIds.includes(l.employeeId));
+  const teamPendingTimesheets = db.timesheets.filter(t => t.status === 'SUBMITTED' && teamMemberIds.includes(t.employeeId));
+  const teamTasks = db.tasks.filter(t => t.organizationArm === lineManagerArm || teamMemberIds.includes(t.assignedToId));
 
   // Employee-specific
   const myAttendance = attendanceToday.find(a => a.employeeId === currentUser.id);
@@ -167,9 +195,10 @@ export default function DashboardModule() {
   };
 
   // ==========================================
-  // VIEW 1: SUPER_ADMIN (Executive Command Center)
   // ==========================================
-  if (role === 'SUPER_ADMIN') {
+  // VIEW 1: SUPER_ADMIN / EXECUTIVE (Executive Command Center)
+  // ==========================================
+  if (role === 'SUPER_ADMIN' || role === 'EXECUTIVE') {
     return (
       <div className="space-y-6">
         {/* Executive Banner */}
@@ -178,18 +207,26 @@ export default function DashboardModule() {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="rounded-md bg-cisd-gold-500 text-cisd-navy-950 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider">
-                  Executive Command Center &bull; Super Admin
+                  Executive Command Center &bull; {role === 'EXECUTIVE' ? 'Executive Director' : 'Super Admin'}
                 </span>
-                <span className="text-xs text-slate-300">&bull; Thursday, 05 November 2026</span>
+                <span className="text-xs text-slate-300">&bull; {todayStr}</span>
+                {filterArm !== 'ALL' && (
+                  <span className="rounded bg-white/20 px-2 py-0.5 text-[10px] font-bold text-cisd-gold-300 border border-white/20">
+                    {getOrganizationArmConfig(filterArm).displayName}
+                  </span>
+                )}
               </div>
               <h1 className="text-2xl font-black tracking-tight text-white">
                 Welcome, {currentUser.firstName} {currentUser.lastName}
               </h1>
               <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-                Multi-entity executive oversight active across Switch Advisory, CISD, and GX Media House. Total workforce of{' '}
-                <span className="font-semibold text-cisd-gold-300">{totalHeadcount} team members</span> across all arms. Today{' '}
-                <span className="font-semibold text-cisd-gold-300">{inOfficeToday} personnel</span> are on-site at Abuja HQ and{' '}
-                <span className="font-semibold text-cisd-gold-300">{remoteToday}</span> are on remote/hybrid schedule.
+                Multi-entity executive oversight active across Switch Advisory, CISD, and GX Media House. Active scope:{' '}
+                <span className="font-semibold text-cisd-gold-300">
+                  {filterArm === 'ALL' ? 'Group-Wide (All Arms)' : getOrganizationArmConfig(filterArm).displayName}
+                </span>{' '}
+                with <span className="font-semibold text-cisd-gold-300">{filteredHeadcount} team members</span> ({filteredActiveStaff} active).
+                Today <span className="font-semibold text-cisd-gold-300">{inOfficeToday} personnel</span> are on-site at Abuja HQ and{' '}
+                <span className="font-semibold text-cisd-gold-300">{remoteToday}</span> are on remote/hybrid schedule ({presenceRate}% presence).
               </p>
             </div>
 
@@ -219,13 +256,57 @@ export default function DashboardModule() {
           </div>
         </div>
 
+        {/* Entity Filter Pill Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+          <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 mr-1 flex-shrink-0">
+            <Filter className="h-3 w-3" /> Entity Scope:
+          </span>
+          <button
+            onClick={() => setFilterArm('ALL')}
+            className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+              filterArm === 'ALL'
+                ? 'bg-cisd-navy-900 text-white shadow'
+                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <span>All Arms (Group-Wide)</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${filterArm === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+              {db.employees.length}
+            </span>
+          </button>
+          {(['SWITCH_ADVISORY', 'CISD', 'GX_MEDIA', 'CENTRAL_HOLDING'] as OrganizationArm[]).map(armKey => {
+            const cfg = getOrganizationArmConfig(armKey);
+            const count = db.employees.filter(e => e.organizationArm === armKey).length;
+            const isSelected = filterArm === armKey;
+            return (
+              <button
+                key={armKey}
+                onClick={() => setFilterArm(armKey)}
+                className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5 border ${
+                  isSelected
+                    ? 'bg-cisd-navy-900 text-white border-cisd-navy-900 shadow'
+                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <span className={`h-2 w-2 rounded-full ${cfg.accentBg || 'bg-slate-400'}`} />
+                <span>{cfg.displayName}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Executive KPI Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
           <div onClick={() => setActiveTab('employees')} className="cursor-pointer rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm hover:shadow-md transition space-y-1 hover:border-cisd-navy-300">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Workforce</span>
-            <p className="text-2xl font-black text-slate-900">{totalHeadcount}</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              {filterArm === 'ALL' ? 'Total Workforce' : 'Arm Workforce'}
+            </span>
+            <p className="text-2xl font-black text-slate-900">{filteredHeadcount}</p>
             <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" /> 100% Retained
+              <TrendingUp className="h-3 w-3" /> {filteredActiveStaff} Active Staff
             </span>
           </div>
 
@@ -248,17 +329,118 @@ export default function DashboardModule() {
           </div>
 
           <div onClick={() => setActiveTab('attendance')} className="cursor-pointer rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm hover:shadow-md transition space-y-1 hover:border-cisd-navy-300">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Punctuality</span>
-            <p className="text-2xl font-black text-slate-900">
-              {Math.round(((attendanceToday.length - lateToday) / (attendanceToday.length || 1)) * 100)}%
-            </p>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Presence Rate</span>
+            <p className="text-2xl font-black text-slate-900">{presenceRate}%</p>
             <span className="text-[10px] text-slate-500">{lateToday} late arrival</span>
           </div>
 
           <div onClick={() => setActiveTab('tasks')} className="cursor-pointer rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm hover:shadow-md transition space-y-1 hover:border-cisd-navy-300">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Strategic Tasks</span>
-            <p className="text-2xl font-black text-slate-900">{db.tasks.length}</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Tasks</span>
+            <p className="text-2xl font-black text-slate-900">{filteredTasks.length}</p>
             <span className="text-[10px] text-rose-600 font-semibold">{overdueTasks.length} overdue</span>
+          </div>
+        </div>
+
+        {/* Tripartite Entity Health & Operations Matrix */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-cisd-gold-500" />
+              <h3 className="font-black text-slate-900 text-sm tracking-tight uppercase">
+                Tripartite Entity Health & Operations Matrix
+              </h3>
+            </div>
+            <span className="text-xs text-slate-400 font-medium">Click any sister arm card to filter KPIs</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {(['SWITCH_ADVISORY', 'CISD', 'GX_MEDIA', 'CENTRAL_HOLDING'] as OrganizationArm[]).map(armKey => {
+              const cfg = getOrganizationArmConfig(armKey);
+              const armStaff = db.employees.filter(e => e.organizationArm === armKey);
+              const armStaffIds = armStaff.map(e => e.id);
+              const armAtt = attendanceToday.filter(a => armStaffIds.includes(a.employeeId));
+              const inOff = armAtt.filter(a => a.workType === 'OFFICE' && a.status !== 'ON_LEAVE').length;
+              const rem = armAtt.filter(a => a.workType === 'REMOTE').length;
+              const armPresence = Math.round(((inOff + rem) / Math.max(1, armStaff.length)) * 100);
+              const pendingLeaves = db.leaveRequests.filter(l => l.status === 'PENDING' && armStaffIds.includes(l.employeeId)).length;
+              const pendingTimesheets = db.timesheets.filter(t => t.status === 'SUBMITTED' && armStaffIds.includes(t.employeeId)).length;
+              const totalPending = pendingLeaves + pendingTimesheets;
+
+              let leadName = 'Folahan Johnson';
+              let leadRole = 'Executive Director';
+              let leadId = 'emp-1';
+              if (armKey === 'SWITCH_ADVISORY') {
+                leadName = 'Chinonso Aluma';
+                leadRole = 'Switch Advisory Lead';
+                leadId = 'emp-6';
+              } else if (armKey === 'CISD') {
+                leadName = 'Marcus Ogunfolaju';
+                leadRole = 'CISD Lead';
+                leadId = 'emp-7';
+              } else if (armKey === 'GX_MEDIA') {
+                leadName = 'George Kaduna';
+                leadRole = 'GX Media Lead';
+                leadId = 'emp-5';
+              }
+
+              const isSelected = filterArm === armKey;
+
+              return (
+                <div
+                  key={armKey}
+                  onClick={() => setFilterArm(isSelected ? 'ALL' : armKey)}
+                  className={`cursor-pointer rounded-2xl border p-4 transition shadow-sm space-y-3 relative overflow-hidden ${
+                    isSelected 
+                      ? 'bg-slate-900 text-white border-cisd-gold-500 ring-2 ring-cisd-gold-500/50 shadow-md' 
+                      : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black border ${isSelected ? 'bg-white/10 text-white border-white/20' : cfg.badgeClass}`}>
+                      {cfg.displayName}
+                    </span>
+                    <span className={`text-[11px] font-bold ${isSelected ? 'text-cisd-gold-400' : 'text-slate-500'}`}>
+                      {armStaff.length} Staff
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="flex items-baseline justify-between">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-slate-400' : 'text-slate-400'}`}>Presence Rate</span>
+                      <span className={`text-base font-black ${armPresence >= 80 ? 'text-emerald-500' : armPresence >= 50 ? 'text-amber-500' : 'text-rose-500'}`}>
+                        {armPresence}%
+                      </span>
+                    </div>
+                    <div className="mt-1 h-1.5 w-full bg-slate-200/50 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 ${armPresence >= 80 ? 'bg-emerald-500' : armPresence >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`}
+                        style={{ width: `${armPresence}%` }}
+                      />
+                    </div>
+                    <div className={`mt-1 flex justify-between text-[10px] ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>
+                      <span>{inOff} On-Site</span>
+                      <span>{rem} Remote</span>
+                    </div>
+                  </div>
+
+                  <div className={`pt-2 border-t ${isSelected ? 'border-slate-800' : 'border-slate-100'} flex items-center justify-between text-[11px]`}>
+                    <div className="truncate pr-2">
+                      <p className={`font-bold truncate ${isSelected ? 'text-white' : 'text-slate-800'}`}>{leadName}</p>
+                      <p className={`text-[10px] truncate ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>{leadRole}</p>
+                    </div>
+                    {totalPending > 0 ? (
+                      <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30">
+                        {totalPending} req
+                      </span>
+                    ) : (
+                      <span className="flex-shrink-0 text-[10px] text-emerald-500 font-medium flex items-center gap-0.5">
+                        <CheckCircle2 className="h-3 w-3" /> Clear
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -467,14 +649,19 @@ export default function DashboardModule() {
                 <span className="rounded-md bg-blue-500 text-white px-2 py-0.5 text-[10px] font-black uppercase tracking-wider">
                   HR Operations & Workforce Command Center
                 </span>
-                <span className="text-xs text-slate-300">&bull; Director of HR & Administration</span>
+                <span className="text-xs text-slate-300">&bull; {todayStr}</span>
+                {filterArm !== 'ALL' && (
+                  <span className="rounded bg-white/20 px-2 py-0.5 text-[10px] font-bold text-cisd-gold-300 border border-white/20">
+                    {getOrganizationArmConfig(filterArm).displayName}
+                  </span>
+                )}
               </div>
               <h1 className="text-2xl font-black tracking-tight text-white">
                 HR Workspace: {currentUser.firstName} {currentUser.lastName}
               </h1>
               <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-                Overseeing workforce compliance, recruitment pipelines, indoctrination tracking, and leave entitlement liabilities.
-                Currently <span className="font-semibold text-cisd-gold-300">{probationStaff.length} new hires</span> are under 90-day probation monitoring.
+                Overseeing workforce compliance, recruitment pipelines, and leave entitlement liabilities across Switch Advisory, CISD, and GX Media House.
+                Active scope: <span className="font-semibold text-cisd-gold-300">{filterArm === 'ALL' ? 'Group-Wide' : getOrganizationArmConfig(filterArm).displayName}</span> ({filteredHeadcount} personnel).
               </p>
             </div>
 
@@ -498,23 +685,65 @@ export default function DashboardModule() {
                 className="flex items-center gap-1.5 rounded-xl bg-white/10 px-3.5 py-2 text-xs font-bold text-white hover:bg-white/20 transition"
               >
                 <UserCheck className="h-4 w-4" />
-                Onboarding ({probationStaff.length})
+                Onboarding ({filteredProbationStaff.length})
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Entity Filter Pill Bar for HR */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+          <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 mr-1 flex-shrink-0">
+            <Filter className="h-3 w-3" /> Entity Scope:
+          </span>
+          <button
+            onClick={() => setFilterArm('ALL')}
+            className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+              filterArm === 'ALL'
+                ? 'bg-cisd-navy-900 text-white shadow'
+                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <span>All Arms (Group-Wide)</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${filterArm === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+              {db.employees.length}
+            </span>
+          </button>
+          {(['SWITCH_ADVISORY', 'CISD', 'GX_MEDIA', 'CENTRAL_HOLDING'] as OrganizationArm[]).map(armKey => {
+            const cfg = getOrganizationArmConfig(armKey);
+            const count = db.employees.filter(e => e.organizationArm === armKey).length;
+            const isSelected = filterArm === armKey;
+            return (
+              <button
+                key={armKey}
+                onClick={() => setFilterArm(armKey)}
+                className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5 border ${
+                  isSelected
+                    ? 'bg-cisd-navy-900 text-white border-cisd-navy-900 shadow'
+                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <span className={`h-2 w-2 rounded-full ${cfg.accentBg || 'bg-slate-400'}`} />
+                <span>{cfg.displayName}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* HR KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
           <div onClick={() => setActiveTab('employees')} className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-cisd-navy-400 transition space-y-1">
             <span className="text-[10px] font-bold uppercase text-slate-400">Total Workforce</span>
-            <p className="text-2xl font-black text-slate-900">{totalHeadcount}</p>
-            <span className="text-[10px] text-slate-500">{activeStaff} active staff</span>
+            <p className="text-2xl font-black text-slate-900">{filteredHeadcount}</p>
+            <span className="text-[10px] text-slate-500">{filteredActiveStaff} active staff</span>
           </div>
 
           <div onClick={() => setActiveTab('onboarding')} className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-cisd-navy-400 transition space-y-1">
             <span className="text-[10px] font-bold uppercase text-slate-400">On Probation</span>
-            <p className="text-2xl font-black text-amber-600">{probationStaff.length}</p>
+            <p className="text-2xl font-black text-amber-600">{filteredProbationStaff.length}</p>
             <span className="text-[10px] text-amber-600 font-semibold">Under orientation</span>
           </div>
 
@@ -537,8 +766,8 @@ export default function DashboardModule() {
           </div>
 
           <div onClick={() => setActiveTab('attendance')} className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-cisd-navy-400 transition space-y-1">
-            <span className="text-[10px] font-bold uppercase text-slate-400">Attendance Rate</span>
-            <p className="text-2xl font-black text-emerald-600">93%</p>
+            <span className="text-[10px] font-bold uppercase text-slate-400">Presence Rate</span>
+            <p className="text-2xl font-black text-emerald-600">{presenceRate}%</p>
             <span className="text-[10px] text-slate-500">{inOfficeToday} in office today</span>
           </div>
         </div>
@@ -711,6 +940,7 @@ export default function DashboardModule() {
   // VIEW 3: LINE_MANAGER (Department Directorate Command Center)
   // ==========================================
   if (role === 'LINE_MANAGER') {
+    const armConfig = getOrganizationArmConfig(currentUser.organizationArm);
     return (
       <div className="space-y-6">
         {/* Manager Header Banner */}
@@ -721,13 +951,16 @@ export default function DashboardModule() {
                 <span className="rounded-md bg-purple-500 text-white px-2 py-0.5 text-[10px] font-black uppercase tracking-wider">
                   Directorate Command Center &bull; Line Manager
                 </span>
+                <span className="rounded bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white border border-white/20">
+                  {armConfig.displayName}
+                </span>
                 <span className="text-xs text-slate-300">&bull; {myDepartment?.name || 'Directorate'}</span>
               </div>
               <h1 className="text-2xl font-black tracking-tight text-white">
                 Manager Workspace: {currentUser.firstName} {currentUser.lastName}
               </h1>
               <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-                Supervising {teamMembers.length} researchers, fellows, and technical associates in the {myDepartment?.name}.
+                Supervising {teamMembers.length} team members in {armConfig.displayName} ({myDepartment?.name || 'Directorate'}).
                 Today <span className="font-semibold text-cisd-gold-300">{teamInOfficeToday} team members</span> are on-site in Abuja and{' '}
                 <span className="font-semibold text-cisd-gold-300">{teamRemoteToday}</span> are on remote/field assignment.
               </p>
@@ -764,7 +997,7 @@ export default function DashboardModule() {
           <div onClick={() => setActiveTab('employees')} className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-purple-300 transition space-y-1">
             <span className="text-[10px] font-bold uppercase text-slate-400">Team Size</span>
             <p className="text-2xl font-black text-slate-900">{teamMembers.length}</p>
-            <span className="text-[10px] text-slate-500">In my directorate</span>
+            <span className="text-[10px] text-slate-500">In my sister arm</span>
           </div>
 
           <div onClick={() => setActiveTab('hybrid')} className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-purple-300 transition space-y-1">
