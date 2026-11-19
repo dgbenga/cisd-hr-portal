@@ -195,11 +195,14 @@ export default function DashboardModule() {
   };
 
   // ==========================================
+  // ROLE-TAILORED WORKSPACE VIEWS
   // ==========================================
-  // VIEW 1: SUPER_ADMIN / EXECUTIVE (Executive Command Center)
-  // ==========================================
-  if (role === 'SUPER_ADMIN' || role === 'EXECUTIVE') {
-    return (
+  const renderRoleDashboard = () => {
+    // ==========================================
+    // VIEW 1: SUPER_ADMIN / EXECUTIVE (Executive Command Center)
+    // ==========================================
+    if (role === 'SUPER_ADMIN' || role === 'EXECUTIVE') {
+      return (
       <div className="space-y-6">
         {/* Executive Banner */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cisd-navy-950 via-cisd-navy-900 to-cisd-navy-800 p-6 text-white shadow-lg">
@@ -424,14 +427,29 @@ export default function DashboardModule() {
                   </div>
 
                   <div className={`pt-2 border-t ${isSelected ? 'border-slate-800' : 'border-slate-100'} flex items-center justify-between text-[11px]`}>
-                    <div className="truncate pr-2">
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedEmployeeIdForModal(leadId);
+                      }}
+                      className="truncate pr-2 cursor-pointer hover:underline"
+                      title={`View ${leadName}'s 360° Institutional Dossier`}
+                    >
                       <p className={`font-bold truncate ${isSelected ? 'text-white' : 'text-slate-800'}`}>{leadName}</p>
                       <p className={`text-[10px] truncate ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>{leadRole}</p>
                     </div>
                     {totalPending > 0 ? (
-                      <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveTab('leave');
+                        }}
+                        className="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30 hover:bg-amber-500/30 transition cursor-pointer"
+                        title="Review Pending Clearance Requests"
+                      >
                         {totalPending} req
-                      </span>
+                      </button>
                     ) : (
                       <span className="flex-shrink-0 text-[10px] text-emerald-500 font-medium flex items-center gap-0.5">
                         <CheckCircle2 className="h-3 w-3" /> Clear
@@ -617,14 +635,22 @@ export default function DashboardModule() {
                 Staff Birthdays
               </h3>
               <div className="rounded-xl bg-rose-50/50 border border-rose-100 p-3 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&q=80" alt="Babatunde Fashina" className="h-9 w-9 rounded-full object-cover" />
+                <div
+                  onClick={() => setSelectedEmployeeIdForModal('emp-10')}
+                  className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition"
+                  title="View Babatunde Fashina's dossier"
+                >
+                  <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&q=80" alt="Babatunde Fashina" className="h-9 w-9 rounded-full object-cover ring-1 ring-rose-200" />
                   <div>
                     <p className="font-bold text-slate-900 text-xs">Babatunde Fashina</p>
                     <p className="text-[10px] text-rose-600 font-bold">Birthday Today &bull; 05 Nov</p>
                   </div>
                 </div>
-                <button onClick={() => setShowBirthdayModal(true)} className="rounded-lg bg-rose-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-700 shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setShowBirthdayModal(true)}
+                  className="rounded-lg bg-rose-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-700 shadow-sm transition"
+                >
                   Wish
                 </button>
               </div>
@@ -632,14 +658,14 @@ export default function DashboardModule() {
           </div>
         </div>
       </div>
-    );
-  }
+      );
+    }
 
-  // ==========================================
-  // VIEW 2: HR_ADMIN (HR Operations Command Center)
-  // ==========================================
-  if (role === 'HR_ADMIN') {
-    return (
+    // ==========================================
+    // VIEW 2: HR_ADMIN (HR Operations Command Center)
+    // ==========================================
+    if (role === 'HR_ADMIN') {
+      return (
       <div className="space-y-6">
         {/* HR Header Banner */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-950 via-cisd-navy-900 to-slate-900 p-6 text-white shadow-lg">
@@ -930,18 +956,46 @@ export default function DashboardModule() {
                 ))}
               </div>
             </div>
+
+            {/* Staff Birthdays */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                <Cake className="h-4 w-4 text-rose-500" />
+                Staff Birthdays
+              </h3>
+              <div className="rounded-xl bg-rose-50/50 border border-rose-100 p-3 flex items-center justify-between">
+                <div
+                  onClick={() => setSelectedEmployeeIdForModal('emp-10')}
+                  className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition"
+                  title="View Babatunde Fashina's dossier"
+                >
+                  <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&q=80" alt="Babatunde Fashina" className="h-9 w-9 rounded-full object-cover ring-1 ring-rose-200" />
+                  <div>
+                    <p className="font-bold text-slate-900 text-xs">Babatunde Fashina</p>
+                    <p className="text-[10px] text-rose-600 font-bold">Birthday Today &bull; 05 Nov</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowBirthdayModal(true)}
+                  className="rounded-lg bg-rose-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-700 shadow-sm transition"
+                >
+                  Wish
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    );
-  }
+      );
+    }
 
-  // ==========================================
-  // VIEW 3: LINE_MANAGER (Department Directorate Command Center)
-  // ==========================================
-  if (role === 'LINE_MANAGER') {
-    const armConfig = getOrganizationArmConfig(currentUser.organizationArm);
-    return (
+    // ==========================================
+    // VIEW 3: LINE_MANAGER (Department Directorate Command Center)
+    // ==========================================
+    if (role === 'LINE_MANAGER') {
+      const armConfig = getOrganizationArmConfig(currentUser.organizationArm);
+      return (
       <div className="space-y-6">
         {/* Manager Header Banner */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-950 via-cisd-navy-900 to-slate-900 p-6 text-white shadow-lg">
@@ -1196,16 +1250,44 @@ export default function DashboardModule() {
                 ))}
               </div>
             </div>
+
+            {/* Staff Birthdays */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                <Cake className="h-4 w-4 text-rose-500" />
+                Staff Birthdays
+              </h3>
+              <div className="rounded-xl bg-rose-50/50 border border-rose-100 p-3 flex items-center justify-between">
+                <div
+                  onClick={() => setSelectedEmployeeIdForModal('emp-10')}
+                  className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition"
+                  title="View Babatunde Fashina's dossier"
+                >
+                  <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&q=80" alt="Babatunde Fashina" className="h-9 w-9 rounded-full object-cover ring-1 ring-rose-200" />
+                  <div>
+                    <p className="font-bold text-slate-900 text-xs">Babatunde Fashina</p>
+                    <p className="text-[10px] text-rose-600 font-bold">Birthday Today &bull; 05 Nov</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowBirthdayModal(true)}
+                  className="rounded-lg bg-rose-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-700 shadow-sm transition"
+                >
+                  Wish
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    );
-  }
+      );
+    }
 
-  // ==========================================
-  // VIEW 4: EMPLOYEE (Self-Service Workspace)
-  // ==========================================
-  return (
+    // ==========================================
+    // VIEW 4: EMPLOYEE (Self-Service Workspace)
+    // ==========================================
+    return (
     <div className="space-y-6">
       {/* Employee Personal Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cisd-navy-950 to-slate-900 p-6 text-white shadow-lg">
@@ -1422,16 +1504,29 @@ export default function DashboardModule() {
 
         {/* Right 1 Col: Meetings, Hardware, Notices */}
         <div className="space-y-6">
-          {/* My Next Meeting / Dialogue */}
+          {/* My Upcoming Sessions */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
-            <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5 border-b border-slate-100 pb-2">
-              <MessagesSquare className="h-4 w-4 text-cisd-navy-900" />
-              My Upcoming Sessions
-            </h3>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                <MessagesSquare className="h-4 w-4 text-cisd-navy-900" />
+                My Upcoming Sessions
+              </h3>
+              <button
+                type="button"
+                onClick={() => setActiveTab('meetings')}
+                className="text-[10px] text-slate-500 hover:text-cisd-navy-900 font-semibold hover:underline"
+              >
+                Calendar
+              </button>
+            </div>
             {myMeetings.length > 0 ? (
               <div className="space-y-2.5">
                 {myMeetings.map(m => (
-                  <div key={m.id} className="rounded-xl bg-slate-50 p-3 space-y-2 border border-slate-100">
+                  <div
+                    key={m.id}
+                    onClick={() => setActiveTab('meetings')}
+                    className="rounded-xl bg-slate-50 p-3 space-y-2 border border-slate-100 cursor-pointer hover:bg-slate-100/80 transition"
+                  >
                     <div>
                       <span className="font-bold text-slate-900 text-xs block leading-snug">{m.title}</span>
                       <p className="text-[10px] text-slate-500 mt-0.5">{m.date} &bull; {m.startTime} – {m.endTime}</p>
@@ -1441,6 +1536,7 @@ export default function DashboardModule() {
                         href={m.virtualLink}
                         target="_blank"
                         rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
                         className="flex items-center justify-center gap-1 rounded-lg bg-blue-50 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition"
                       >
                         <Video className="h-3.5 w-3.5" />
@@ -1462,13 +1558,17 @@ export default function DashboardModule() {
                 <Laptop className="h-4 w-4 text-cisd-navy-900" />
                 My Assigned Hardware
               </h3>
-              <button onClick={() => setActiveTab('assets')} className="text-[10px] text-slate-500 hover:underline">
+              <button onClick={() => setActiveTab('assets')} className="text-[10px] text-slate-500 hover:text-cisd-navy-900 font-semibold hover:underline">
                 Registry
               </button>
             </div>
             <div className="space-y-2">
               {myAssets.map(a => (
-                <div key={a.id} className="rounded-xl bg-slate-50 p-2.5 text-xs space-y-0.5 border border-slate-100">
+                <div
+                  key={a.id}
+                  onClick={() => setActiveTab('assets')}
+                  className="rounded-xl bg-slate-50 p-2.5 text-xs space-y-0.5 border border-slate-100 cursor-pointer hover:bg-slate-100/80 transition"
+                >
                   <span className="font-bold text-slate-900 block truncate">{a.name}</span>
                   <div className="flex justify-between text-[10px] text-slate-500">
                     <span>SN: {a.serialNumber}</span>
@@ -1481,10 +1581,19 @@ export default function DashboardModule() {
 
           {/* Institutional Circulars */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
-            <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5 border-b border-slate-100 pb-2">
-              <Sparkles className="h-4 w-4 text-cisd-gold-600" />
-              Notices
-            </h3>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4 text-cisd-gold-600" />
+                Notices & Circulars
+              </h3>
+              <button
+                type="button"
+                onClick={() => setActiveTab('announcements')}
+                className="text-[10px] text-slate-500 hover:text-cisd-navy-900 font-semibold hover:underline"
+              >
+                All
+              </button>
+            </div>
             <div className="space-y-2">
               {db.announcements.slice(0, 2).map(ann => (
                 <div key={ann.id} onClick={() => setActiveTab('announcements')} className="cursor-pointer rounded-xl bg-slate-50 p-2.5 hover:bg-slate-100 transition space-y-0.5">
@@ -1494,8 +1603,43 @@ export default function DashboardModule() {
               ))}
             </div>
           </div>
+
+          {/* Staff Birthdays */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+            <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5 border-b border-slate-100 pb-2">
+              <Cake className="h-4 w-4 text-rose-500" />
+              Staff Birthdays
+            </h3>
+            <div className="rounded-xl bg-rose-50/50 border border-rose-100 p-3 flex items-center justify-between">
+              <div
+                onClick={() => setSelectedEmployeeIdForModal('emp-10')}
+                className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition"
+                title="View Babatunde Fashina's dossier"
+              >
+                <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&q=80" alt="Babatunde Fashina" className="h-9 w-9 rounded-full object-cover ring-1 ring-rose-200" />
+                <div>
+                  <p className="font-bold text-slate-900 text-xs">Babatunde Fashina</p>
+                  <p className="text-[10px] text-rose-600 font-bold">Birthday Today &bull; 05 Nov</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBirthdayModal(true)}
+                className="rounded-lg bg-rose-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-700 shadow-sm transition"
+              >
+                Wish
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      {renderRoleDashboard()}
 
       {/* Quick Leave Application Modal */}
       {quickLeaveModal && (
@@ -1503,7 +1647,11 @@ export default function DashboardModule() {
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl animate-in zoom-in-95">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
               <h3 className="font-bold text-slate-900 text-sm">Apply for Leave</h3>
-              <button onClick={() => setQuickLeaveModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">
+              <button
+                type="button"
+                onClick={() => setQuickLeaveModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-lg"
+              >
                 &times;
               </button>
             </div>
@@ -1583,6 +1731,88 @@ export default function DashboardModule() {
                   className="rounded-lg bg-cisd-navy-900 px-4 py-2 font-bold text-white hover:bg-cisd-navy-800 shadow"
                 >
                   Submit Application
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Birthday Celebration Modal */}
+      {showBirthdayModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+                  <Cake className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Send Birthday Wishes</h4>
+                  <p className="text-[10px] text-slate-500">Broadcast diplomatic felicitations to the institutional noticeboard</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBirthdayModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-base font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-xl bg-rose-50/60 border border-rose-100 p-3">
+              <img
+                src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&q=80"
+                alt="Babatunde Fashina"
+                className="h-12 w-12 rounded-full object-cover ring-2 ring-rose-300"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-slate-900">Babatunde Fashina</p>
+                <p className="text-[11px] text-slate-500">Senior Research Fellow &bull; CISD-REC-010</p>
+                <span className="inline-block mt-0.5 rounded-full bg-rose-200 text-rose-800 font-extrabold text-[9px] px-2 py-0.5">
+                  Celebrating Today (05 Nov)
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowBirthdayModal(false);
+                  setSelectedEmployeeIdForModal('emp-10');
+                }}
+                className="text-[10px] font-bold text-rose-700 hover:underline"
+              >
+                View Profile
+              </button>
+            </div>
+
+            <form onSubmit={handleSendBirthdayGreeting} className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Felicitations & Greeting Message</label>
+                <textarea
+                  rows={3}
+                  required
+                  value={birthdayGreeting}
+                  onChange={(e) => setBirthdayGreeting(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-800 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                  placeholder="Type your birthday wishes..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t">
+                <button
+                  type="button"
+                  onClick={() => setShowBirthdayModal(false)}
+                  className="rounded-lg border px-3.5 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-rose-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-rose-700 shadow flex items-center gap-1.5"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Broadcast to Noticeboard
                 </button>
               </div>
             </form>

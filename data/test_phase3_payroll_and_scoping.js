@@ -68,10 +68,10 @@ async function runTests() {
     );
 
     // -------------------------------------------------------------------------
-    // TEST 4: 4-Eyes Governance on Group Payroll (Test Period: 2026-12)
+    // TEST 4: 4-Eyes Governance on Group Payroll (Test Period: 2027-01 Cycle)
     // -------------------------------------------------------------------------
-    console.log('\n--- TEST 4: 4-Eyes Governance Workflow (December 2026 Cycle) ---');
-    const testMonth = '2026-12';
+    console.log('\n--- TEST 4: 4-Eyes Governance Workflow (January 2027 Cycle) ---');
+    const testMonth = '2027-01';
 
     // 4.1 Victory (Finance L2) generates payroll drafts
     console.log('4.1 Victory Kinosi drafts December 2026 payroll...');

@@ -317,7 +317,15 @@ export default function OnboardingModule() {
                       : 'border-slate-200 bg-white hover:bg-slate-50'
                   }`}
                 >
-                  <button className="mt-0.5 flex-shrink-0 text-slate-400">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleTask(task.id, task.isCompleted);
+                    }}
+                    className="mt-0.5 flex-shrink-0 text-slate-400 hover:text-emerald-600 transition"
+                    title={task.isCompleted ? 'Mark milestone incomplete' : 'Mark milestone completed'}
+                  >
                     {task.isCompleted ? (
                       <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                     ) : (
